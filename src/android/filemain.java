@@ -1,4 +1,4 @@
-package com.sarriaroman.PhotoViewer;
+package com.bais.filepicker;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -10,7 +10,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
-public class PhotoViewer extends CordovaPlugin {
+public class filemain extends CordovaPlugin {
 
    //public static final int PERMISSION_DENIED_ERROR = 20;
 
@@ -22,7 +22,7 @@ public class PhotoViewer extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if (action.equals("show")) {
+        if (action.equals("start")) {
             this.args = args;
             this.callbackContext = callbackContext;
 
@@ -41,31 +41,11 @@ public class PhotoViewer extends CordovaPlugin {
     }
 
     protected void launchActivity() throws JSONException {
-        Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
+       // Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
+       
+        //i.putExtra("options", this.args.optJSONObject(0).toString());
 
-        i.putExtra("url", this.args.getString(0));
-       // i.putExtra("title", this.args.getString(1));
-        i.putExtra("options", this.args.optJSONObject(2).toString());
-
-        this.cordova.getActivity().startActivity(i);
+       // this.cordova.getActivity().startActivity(i);
         this.callbackContext.success("");
     }
-
-
-   /* public void onRequestPermissionResult(int requestCode, String[] permissions,
-                                          int[] grantResults) throws JSONException {
-        for(int r:grantResults) {
-            if(r == PackageManager.PERMISSION_DENIED) {
-                this.callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
-                return;
-            }
-        }
-
-        switch(requestCode) {
-            case REQ_CODE:
-                launchActivity();
-                break;
-        }
-
-    }*/
 }
