@@ -8,13 +8,13 @@
 	<platform name="android">
 		<config-file parent="/*" target="res/xml/config.xml">
 			<feature name="filepicker">
-				<param name="android-package" value="com.bais.filepicker.filemain" />
+				<param name="android-package" value="com.bais.filepicker.filepicker" />
 			</feature>
 		</config-file>
 		<config-file parent="/*" target="AndroidManifest.xml" />
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <activity android:name="com.bais.filepicker.filemain" />
+            <activity android:name="com.bais.filepicker.filepicker" />
         </config-file>
 
 		<config-file parent="/manifest" target="AndroidManifest.xml">
@@ -23,6 +23,6 @@
 			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 		</config-file>
 
-		<source-file src="src/android/filemain.java" target-dir="com/bais/filepicker" />
+		<source-file src="src/android/filepicker.java" target-dir="com/bais/filepicker/" />
 	</platform>
 </plugin>
