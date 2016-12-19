@@ -10,7 +10,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
-public class filemain extends CordovaPlugin {
+public class filepicker extends CordovaPlugin {
 
    //public static final int PERMISSION_DENIED_ERROR = 20;
 
