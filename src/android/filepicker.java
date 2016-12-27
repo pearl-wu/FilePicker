@@ -1,13 +1,32 @@
 package com.bais.filepicker;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Random;
+
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+
+
 import android.Manifest;
+import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.Environment;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
    //public static final int PERMISSION_DENIED_ERROR = 20;
@@ -18,7 +37,7 @@ public class filepicker extends CordovaPlugin {
     protected CallbackContext callbackContext;
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("start")) {
             this.args = args;
             this.callbackContext = callbackContext;
@@ -72,83 +91,81 @@ public class filepicker extends CordovaPlugin {
         this.callbackContext.success("");
     }
    
-   private Boolean downloadUrl(String fileUrl, String dirName,
-   String fileName, Boolean overwrite, CallbackContext callbackContext)
+   private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext)
      throws InterruptedException, JSONException {
-  try {
-   File dir = new File(dirName);
-   if (!dir.exists()) {
-    dir.mkdirs();
-   }
-   File file = new File(dirName, fileName);
-   if (overwrite == true || !file.exists()) {
-    Intent intent = new Intent ();
-    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
-    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-          NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-    NotificationCompat.Builder mBuilder =
-         new NotificationCompat.Builder(cordova.getActivity())
-         .setSmallIcon(R.drawable.ic_stat_notification)
-         .setContentTitle(cordova.getActivity().getString(R.string.app_name))
-         .setContentText("File: " + fileName + " - 0%");
-    int mNotificationId = new Random().nextInt(10000);
-    URL url = new URL(fileUrl);
-    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
-    ucon.setRequestMethod("GET");
-    ucon.connect();
-    InputStream is = ucon.getInputStream();
-    byte[] buffer = new byte[1024];
-    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
-    FileOutputStream fos = new FileOutputStream(file);
-    showToast("Download started.","short");
-    int step = 0;
-    while ((readed = is.read(buffer)) > 0) {
-     fos.write(buffer, 0, readed);
-     totalReaded += readed;
-     int newProgress = (int) (totalReaded*100/fileSize);
-     if (newProgress != progress & newProgress > step) {
-      mBuilder.setProgress(100, newProgress, false);
-      mBuilder.setContentText("File: " + fileName + " - " + step + "%");
-      mBuilder.setContentIntent(pend);
-      mNotifyManager.notify(mNotificationId, mBuilder.build());
-      step = step + 1;
-     }
-    }
-    fos.flush();
-    fos.close();
-    is.close();
-    ucon.disconnect();
-    mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
-             mNotifyManager.notify(mNotificationId, mBuilder.build());
-             try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
-                }
-             mNotifyManager.cancel(mNotificationId);
-    showToast("Download finished.","short");
-   } else if (overwrite == false) {
-    showToast("File is already downloaded.","short");
-   }
-   if(!file.exists()) {
-    showToast("Download went wrong, please try again or contact the developer.","long");
-    Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
-   }
-   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
-   return true;
-  } catch (FileNotFoundException e) {
-   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
-   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
-   e.printStackTrace();
-   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-   return false;
-  } catch (IOException e) {
-   showToast("Error downloading file, please try again or contact the developer.","long");
-   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
-   e.printStackTrace();
-   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-   return false;
-  }
+	  try {
+		   File dir = new File(dirName);
+		   if (!dir.exists()) {
+			   dir.mkdirs();
+		   }
+		   File file = new File(dirName, fileName);
+		   if (overwrite == true || !file.exists()) {
+			    Intent intent = new Intent ();
+			    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
+			    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			          NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
+			    NotificationCompat.Builder mBuilder =
+			         new NotificationCompat.Builder(cordova.getActivity())
+			         //.setContentTitle(cordova.getActivity().getString(R.string.app_name))
+			         .setContentText("File: " + fileName + " - 0%");
+			    int mNotificationId = new Random().nextInt(10000);
+			    URL url = new URL(fileUrl);
+			    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
+			    ucon.setRequestMethod("GET");
+			    ucon.connect();
+			    InputStream is = ucon.getInputStream();
+			    byte[] buffer = new byte[1024];
+			    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
+			    FileOutputStream fos = new FileOutputStream(file);
+			    showToast("Download started.","short");
+			    int step = 0;
+			    while ((readed = is.read(buffer)) > 0) {
+			     fos.write(buffer, 0, readed);
+			     totalReaded += readed;
+			     int newProgress = (int) (totalReaded*100/fileSize);
+			     if (newProgress != progress & newProgress > step) {
+			      mBuilder.setProgress(100, newProgress, false);
+			      mBuilder.setContentText("File: " + fileName + " - " + step + "%");
+			      mBuilder.setContentIntent(pend);
+			      mNotifyManager.notify(mNotificationId, mBuilder.build());
+			      step = step + 1;
+			     }
+		    }
+		    fos.flush();
+		    fos.close();
+		    is.close();
+		    ucon.disconnect();
+		    mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
+		             mNotifyManager.notify(mNotificationId, mBuilder.build());
+		             try {
+		                    Thread.sleep(1000);
+		                } catch (InterruptedException e) {
+		                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
+		                }
+		             mNotifyManager.cancel(mNotificationId);
+		    showToast("Download finished.","short");
+		   } else if (overwrite == false) {
+		    showToast("File is already downloaded.","short");
+		   }
+		   if(!file.exists()) {
+		    showToast("Download went wrong, please try again or contact the developer.","long");
+		    Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
+		   }
+		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+		   return true;
+	  } catch (FileNotFoundException e) {
+		   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
+		   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+		   e.printStackTrace();
+		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+		   return false;
+	  } catch (IOException e) {
+		   showToast("Error downloading file, please try again or contact the developer.","long");
+		   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+		   e.printStackTrace();
+		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+		   return false;
+	  }
  }
  
  private void showToast(final String message, final String duration) {
