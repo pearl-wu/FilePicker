@@ -52,32 +52,38 @@ public class filepicker extends CordovaPlugin {
        
        if (action.equals("get")) {
          cordova.getThreadPool().execute(new Runnable() {
-          public void run() {
-           try {
-            JSONObject params = args.getJSONObject(0);
-            String fileUrl=params.getString("url");
-            Boolean overwrite=params.getBoolean("overwrite");
-            String fileName = fileUrl.substring(fileUrl
-              .lastIndexOf("/") + 1);
-            String dirName = Environment.getExternalStorageDirectory().getAbsolutePath()
-              + "/Download/";
-            downloadUrl(fileUrl, dirName, fileName, overwrite, callbackContext);
-           } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.JSON_EXCEPTION);
-            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
-           } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
-            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-           }
-          }
+	          public void run() {
+	           try {
+		            JSONObject params = args.getJSONObject(0);
+		            String fileUrl=params.getString("url");
+		            Boolean overwrite=params.getBoolean("overwrite");
+		            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+		            String dirName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/";
+		            downloadUrl(fileUrl, dirName, fileName, overwrite, callbackContext);
+	           } catch (JSONException e) {
+	        	   e.printStackTrace();
+	        	   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.JSON_EXCEPTION);
+	        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
+	           } catch (InterruptedException e) {
+	        	   e.printStackTrace();
+	        	   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+	        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+	           }
+	          }
          });
          return true;
         }
        
        if(action.equals("find")){
-    	   
+    	   JSONObject params = args.getJSONObject(0);
+    	   String fileUrl = params.getString("url");
+    	   fileUrl = fileUrl.replaceAll("\\s*|\t|\r|\n", "");
+    	   String dirName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/";
+    	   File filed = new File(dirName+fileUrl);
+    	   if(filed.exists()){
+    		   //showToast(filed.getAbsolutePath(),"short");
+    		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+    	   }    	  
     	  return true;
        }     
        
@@ -87,7 +93,6 @@ public class filepicker extends CordovaPlugin {
     protected void getPermission() {
         cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
     }
-
     protected void launchActivity() throws JSONException {
        // Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
        //i.putExtra("options", this.args.optJSONObject(0).toString());
@@ -144,7 +149,7 @@ public class filepicker extends CordovaPlugin {
 		             try {
 		                    Thread.sleep(1000);
 		                } catch (InterruptedException e) {
-		                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
+		                 //Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
 		                }
 		             mNotifyManager.cancel(mNotificationId);
 		    showToast("下載完成","short");
@@ -153,19 +158,19 @@ public class filepicker extends CordovaPlugin {
 		   }
 		   if(!file.exists()) {
 		    showToast("Download went wrong, please try again or contact the developer.","long");
-		    Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
+		    //Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
 		   }
 		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 		   return true;
 	  } catch (FileNotFoundException e) {
 		   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
-		   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+		   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 		   e.printStackTrace();
 		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 		   return false;
 	  } catch (IOException e) {
 		   showToast("Error downloading file, please try again or contact the developer.","long");
-		   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+		   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 		   e.printStackTrace();
 		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 		   return false;
