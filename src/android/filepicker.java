@@ -76,6 +76,10 @@ public class filepicker extends CordovaPlugin {
          return true;
         }
        
+       if(action.equals("find")){
+    	   
+    	  return true;
+       }     
        
         return false;
     }
@@ -117,7 +121,7 @@ public class filepicker extends CordovaPlugin {
 			    byte[] buffer = new byte[1024];
 			    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
 			    FileOutputStream fos = new FileOutputStream(file);
-			    showToast("Download started.","short");
+			    showToast("開始下載...","short");
 			    int step = 0;
 			    while ((readed = is.read(buffer)) > 0) {
 			     fos.write(buffer, 0, readed);
@@ -143,7 +147,7 @@ public class filepicker extends CordovaPlugin {
 		                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
 		                }
 		             mNotifyManager.cancel(mNotificationId);
-		    showToast("Download finished.","short");
+		    showToast("下載完成","short");
 		   } else if (overwrite == false) {
 		    showToast("File is already downloaded.","short");
 		   }
@@ -180,7 +184,5 @@ public class filepicker extends CordovaPlugin {
     toast.show();
    }
   });
- }
-   
-   
+ }  
 }
