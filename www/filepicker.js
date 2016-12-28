@@ -10,3 +10,7 @@ exports.start = function(options) {
 exports.get = function(message, win, fail){
     exec(win, fail, "filepicker", "get", [message]);
 }
+
+exports.find = function(message, win, fail){
+    exec(win, fail, "filepicker", "find", [message]);
+}
