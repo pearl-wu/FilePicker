@@ -20,6 +20,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -83,7 +84,12 @@ public class filepicker extends CordovaPlugin {
        }
        
        if(action.equals("openweb")){
+    	   JSONObject params = args.getJSONObject(0);
+    	   String webUrl = params.getString("url");
     	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+    	   Uri uri = Uri.parse(webUrl);
+    	   Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+    	   this.cordova.getActivity().startActivity(intent);
     	  return true;
        } 
        
