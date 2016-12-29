@@ -14,3 +14,7 @@ exports.get = function(message, win, fail){
 exports.find = function(message, win, fail){
     exec(win, fail, "filepicker", "find", [message]);
 }
+
+exports.openweb = function(message, win, fail){
+    exec(win, fail, "filepicker", "openweb", [message]);
+}
