@@ -15,6 +15,10 @@ exports.find = function(message, win, fail){
     exec(win, fail, "filepicker", "find", [message]);
 }
 
+exports.openfile = function(message, win, fail){
+    exec(win, fail, "filepicker", "openfile", [message]);
+}
+
 exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
