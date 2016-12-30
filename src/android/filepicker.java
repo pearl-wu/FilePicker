@@ -95,20 +95,12 @@ public class filepicker extends CordovaPlugin {
        
        if(action.equals("openfile")){
     	   JSONObject params = args.getJSONObject(0);
-    	   String webUrl = params.getString("url");
-    	   
+    	   String fileUrl = params.getString("url");
     	   PluginResult.Status status = PluginResult.Status.OK;
-           String result = "";
-
            try{
-               if(action.equals("openFile")) {
-                   openFile(args.getString(0));
-               }else{
-                   status = PluginResult.Status.INVALID_ACTION;
-               }
+               openFile(fileUrl);
+               callbackContext.sendPluginResult(new PluginResult(status));
                return true;
-           }catch(JSONException e){
-               return false;
            }catch(IOException e){
                return false;
            }
