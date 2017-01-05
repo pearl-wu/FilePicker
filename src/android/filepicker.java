@@ -1,13 +1,12 @@
 package com.bais.filepicker;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Random;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -15,10 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.Manifest;
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -59,10 +54,6 @@ public class filepicker extends CordovaPlugin {
 	           } catch (JSONException e) {
 	        	   e.printStackTrace();
 	        	   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.JSON_EXCEPTION);
-	        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
-	           } catch (InterruptedException e) {
-	        	   e.printStackTrace();
-	        	   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 	        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 	           }
 	          }
@@ -119,81 +110,48 @@ public class filepicker extends CordovaPlugin {
         this.callbackContext.success("");
     }
    
-   private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext)
-     throws InterruptedException, JSONException {
-	  try {
-		   File dir = new File(dirName);
-		   if (!dir.exists()) {
-			   dir.mkdirs();
-		   }
-		   File file = new File(dirName, fileName);
-		   if (overwrite == true || !file.exists()) {
-			    Intent intent = new Intent ();
-			    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
-			    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			    NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-			    Notification.Builder mBuilder = new Notification.Builder(cordova.getActivity())
-			         								.setContentText("File: " + fileName + " - 0%");
-			    int mNotificationId = new Random().nextInt(10000);
-			    URL url = new URL(fileUrl);
-			    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
-			    ucon.setRequestMethod("GET");
-			    ucon.connect();
-			    InputStream is = ucon.getInputStream();
-			    byte[] buffer = new byte[1024];
-			    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
-			    FileOutputStream fos = new FileOutputStream(file);
-			    //showToast("開始下載...","short");
-			    int step = 0;
-			    while ((readed = is.read(buffer)) > 0) {
-			     fos.write(buffer, 0, readed);
-			     totalReaded += readed;
-			     int newProgress = (int) (totalReaded*100/fileSize);
-				     if (newProgress != progress & newProgress > step) {
-					      mBuilder.setProgress(100, newProgress, false);
-					      mBuilder.setContentText("File: " + fileName + " - " + step + "%");
-					      mBuilder.setContentIntent(pend);
-					      mNotifyManager.notify(mNotificationId, mBuilder.build());
-					      showToast("開始下載... " + fileName + " - " + step + "%","short");
-					      step = step + 1;
-				     }
-			     }
-			    fos.flush();
-			    fos.close();
-			    is.close();
-			    ucon.disconnect();
-			    mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
-			             mNotifyManager.notify(mNotificationId, mBuilder.build());
-			             try {
-			                    Thread.sleep(1000);
-			             } catch (InterruptedException e) {
-			                 //Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
-			             }
-			    mNotifyManager.cancel(mNotificationId);
-			    showToast("下載完成,檔案路徑:/Download/"+fileName,"short");
-		   } else if (overwrite == false) {
-			   showToast("File is already downloaded.","short");
-		   }
-		   if(!file.exists()) {
-			   showToast("Download went wrong, please try again or contact the developer.","long");
-			   //Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
-		   }
-		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
-		   return true;
-	  } catch (FileNotFoundException e) {
-		   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
-		   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
-		   e.printStackTrace();
-		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-		   return false;
-	  } catch (IOException e) {
-		   showToast("Error downloading file, please try again or contact the developer.","long");
-		   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
-		   e.printStackTrace();
-		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-		   return false;
-	  }
+   private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext){
+
+       try {
+    	   URL url = new URL(fileUrl);
+    	   HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    	   InputStream inputStream = conn.getInputStream();
+    	   byte[] getData = readInputStream(inputStream);
+    	   
+    	   File saveDir = new File(dirName);  
+           if (!saveDir.exists()) {  
+               saveDir.mkdir();  
+           }  
+           File file = new File(saveDir + File.separator + fileName);  
+           FileOutputStream fos = new FileOutputStream(file);  
+           fos.write(getData);  
+           if (fos != null) {  
+               fos.close();  
+           }  
+           if (inputStream != null) {  
+               inputStream.close();  
+           } 
+           Toast.makeText(cordova.getActivity(), "info:" + url + " download success", Toast.LENGTH_LONG).show();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}  
+
+	 return false ;
  }
+   
+public static byte[] readInputStream(InputStream inputStream) throws IOException {  
+    byte[] buffer = new byte[1024];  
+    int len = 0;  
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();  
+       while ((len = inputStream.read(buffer)) != -1) {  
+           bos.write(buffer, 0, len);  
+       }  
+    bos.close();  
+    return bos.toByteArray();  
+}     
+   
+   
    
    @SuppressWarnings("unused")
 private void openFile(String url) throws IOException {
