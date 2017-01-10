@@ -25,6 +25,13 @@
 		</config-file>
 
 		<source-file src="src/android/filepicker.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/com/rensanning/multiselect/Action.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/com/rensanning/multiselect/CustomGallery.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/com/rensanning/multiselect/CustomGalleryActivity.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/com/rensanning/multiselect/GalleryAdapter.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/com/rensanning/multiselect/Utility.java" target-dir="src/com/bais/filepicker/" />
+		
+		
 		<source-file src="libs/universal-image-loader-1.9.0.jar" target-dir="libs/" />
 		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
 		<source-file src="res/drawable/check_icon.png" target-dir="res/drawable"/>
