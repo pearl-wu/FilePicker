@@ -22,3 +22,11 @@ exports.openfile = function(message, win, fail){
 exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
+
+exports.chooespicture = function(message, win, fail){
+    exec(win, fail, "filepicker", "chooespicture", [message]);
+}
+
+exports.chooesfiile = function(message, win, fail){
+    exec(win, fail, "filepicker", "chooesfiile", [message]);
+}
