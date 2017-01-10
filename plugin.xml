@@ -25,8 +25,26 @@
 		</config-file>
 
 		<source-file src="src/android/filepicker.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="libs/universal-image-loader-1.7.0.jar" target-dir="libs/" />
-		<source-file src="layout/mult_chooespicture.xml" target-dir="res/layout/" />
-		<source-file src="layout/grid_chooespicture.xml" target-dir="res/layout/" />
+		<source-file src="libs/universal-image-loader-1.9.0.jar" target-dir="libs/" />
+		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
+		<source-file src="res/drawable/check_icon.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/no_media.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/tick_mark_bg.xml" target-dir="res/drawable"/>
+		<source-file src="res/drawable/trasnparent_bg.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable-hdpi/button_default.9.png" target-dir="res/drawable-hdpi"/>
+		<source-file src="res/drawable-hdpi/button_hover.9.png" target-dir="res/drawable-hdpi"/>
+		<source-file src="res/drawable-hdpi/check_icon.png" target-dir="res/drawable-hdpi"/>
+		<source-file src="res/drawable-hdpi/top_bar.png" target-dir="res/drawable-hdpi"/>
+		<source-file src="res/drawable-mdpi/button_default.9.png" target-dir="res/drawable-mdpi"/>
+		<source-file src="res/drawable-mdpi/button_hover.9.png" target-dir="res/drawable-mdpi"/>
+		<source-file src="res/drawable-mdpi/check_icon.png" target-dir="res/drawable-mdpi"/>
+		<source-file src="res/drawable-mdpi/top_bar.png" target-dir="res/drawable-mdpi"/>
+		<source-file src="res/drawable-xhdpi/button_default.9.png" target-dir="res/drawable-xhdpi"/>
+		<source-file src="res/drawable-xhdpi/button_hover.9.png" target-dir="res/drawable-xhdpi"/>
+		<source-file src="res/drawable-xhdpi/check_icon.png" target-dir="res/drawable-xhdpi"/>
+		<source-file src="res/drawable-xhdpi/top_bar.png" target-dir="res/drawable-xhdpi"/>
+		<source-file src="res/layout/gallery.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/gallery_item.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/titlebar.xml" target-dir="res/layout"/>
 	</platform>
 </plugin>
