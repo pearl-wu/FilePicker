@@ -26,5 +26,7 @@
 
 		<source-file src="src/android/filepicker.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="libs/universal-image-loader-1.7.0.jar" target-dir="libs/" />
+		<source-file src="layout/mult_chooespicture.xml" target-dir="res/layout/" />
+		<source-file src="layout/grid_chooespicture.xml" target-dir="res/layout/" />
 	</platform>
 </plugin>
