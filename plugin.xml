@@ -25,13 +25,11 @@
 		</config-file>
 
 		<source-file src="src/android/filepicker.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="src/com/rensanning/multiselect/Action.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="src/com/rensanning/multiselect/CustomGallery.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="src/com/rensanning/multiselect/CustomGalleryActivity.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="src/com/rensanning/multiselect/GalleryAdapter.java" target-dir="src/com/bais/filepicker/" />
-		<source-file src="src/com/rensanning/multiselect/Utility.java" target-dir="src/com/bais/filepicker/" />
-		
-		
+		<source-file src="src/android/Action.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/android/CustomGallery.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/android/CustomGalleryActivity.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/android/GalleryAdapter.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/android/Utility.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="libs/universal-image-loader-1.9.0.jar" target-dir="libs/" />
 		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
 		<source-file src="res/drawable/check_icon.png" target-dir="res/drawable"/>
@@ -50,9 +48,9 @@
 		<source-file src="res/drawable-xhdpi/button_hover.9.png" target-dir="res/drawable-xhdpi"/>
 		<source-file src="res/drawable-xhdpi/check_icon.png" target-dir="res/drawable-xhdpi"/>
 		<source-file src="res/drawable-xhdpi/top_bar.png" target-dir="res/drawable-xhdpi"/>
-		<source-file src="res/layout/chooespicture_gallery.xml" target-dir="res/layout"/>
-		<source-file src="res/layout/chooespicture_gallery_item.xml" target-dir="res/layout"/>
-		<source-file src="res/layout/chooespicture_titlebar.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/gallery.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/gallery_item.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/titlebar.xml" target-dir="res/layout"/>
 		<source-file src="res/values-mdpi/colors.xml" target-dir="res/values"/>
 		<source-file src="res/values-mdpi/dimen.xml" target-dir="res/values"/>
 	</platform>
