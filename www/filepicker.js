@@ -24,9 +24,9 @@ exports.openweb = function(message, win, fail){
 }
 
 exports.chooespicture = function(message, win, fail){
-    exec(win, fail, "filepicker", "chooespicture", [message]);
+    exec(win, fail, "filepicker", "chooespicture", []);
 }
 
 exports.chooesfiile = function(message, win, fail){
-    exec(win, fail, "filepicker", "chooesfiile", [message]);
+    exec(win, fail, "filepicker", "chooesfiile", []);
 }
