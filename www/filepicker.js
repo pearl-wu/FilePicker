@@ -24,7 +24,22 @@ exports.openweb = function(message, win, fail){
 }
 
 exports.chooespicture = function(message, win, fail){
-    exec(win, fail, "filepicker", "chooespicture", []);
+    if (!message) {
+        message = {};
+    }
+    
+    var params = {
+        type: options.type ? options.type : "multiple",
+        limit: options.limit ? options.limit : 15,
+        cancelButtonText: options.cancelButtonText ? options.cancelButtonText : "Cancel",
+        okButtonText: options.okButtonText ? options.okButtonText : "Done",
+        titleText: options.titleText ? options.titleText : "Gallery",
+        errorMessageText: options.errorMessageText ? options.errorMessageText : "Max limit reached!"
+    };
+    
+    
+    
+    exec(win, fail, "filepicker", "chooespicture", [params]);
 }
 
 exports.chooesfiile = function(message, win, fail){
