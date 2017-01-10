@@ -43,9 +43,9 @@
 		<source-file src="res/drawable-xhdpi/button_hover.9.png" target-dir="res/drawable-xhdpi"/>
 		<source-file src="res/drawable-xhdpi/check_icon.png" target-dir="res/drawable-xhdpi"/>
 		<source-file src="res/drawable-xhdpi/top_bar.png" target-dir="res/drawable-xhdpi"/>
-		<source-file src="res/layout/gallery.xml" target-dir="res/layout"/>
-		<source-file src="res/layout/gallery_item.xml" target-dir="res/layout"/>
-		<source-file src="res/layout/titlebar.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/chooespicture_gallery.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/chooespicture_gallery_item.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/chooespicture_titlebar.xml" target-dir="res/layout"/>
 		<source-file src="res/values-mdpi/colors.xml" target-dir="res/values"/>
 		<source-file src="res/values-mdpi/dimen.xml" target-dir="res/values"/>
 	</platform>
