@@ -2,21 +2,40 @@ package com.bais.filepicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+
+import tw.com.bais.ichat.R;
 import android.Manifest;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
@@ -26,6 +45,11 @@ public class filepicker extends CordovaPlugin {
     public static final int REQ_CODE = 0;
     protected JSONArray args;
     protected CallbackContext callbackContext;
+    public LayoutInflater mInflater;
+    
+    private ArrayList<String> imageUrls;
+    private DisplayImageOptions options;
+    //private ImageAdapter imageAdapter;
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -55,7 +79,10 @@ public class filepicker extends CordovaPlugin {
 	        	   e.printStackTrace();
 	        	   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.JSON_EXCEPTION);
 	        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-	           }
+	           } catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	          }
          });
          return true;
@@ -97,22 +124,141 @@ public class filepicker extends CordovaPlugin {
            }
        } 
        
+       if(action.equals("chooespicture")){
+    	   this.imageUrls = new ArrayList<String>();
+    	   final String[] columns = { MediaStore.Images.Media.DATA,MediaStore.Images.Media._ID };
+    	   final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
+    	   Cursor imagecursor = this
+    			   .cordova.getActivity().getApplicationContext()
+                   .getContentResolver()
+                   .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
+                           null, null, orderBy + " DESC");
+    	   
+    	   for (int i = 0; i < imagecursor.getCount(); i++) {
+               imagecursor.moveToPosition(i);
+               int dataColumnIndex = imagecursor
+                       .getColumnIndex(MediaStore.Images.Media.DATA);
+               imageUrls.add(imagecursor.getString(dataColumnIndex));
+               Log.i("imageUrl", imageUrls.get(i));
+    	   }
+    	   //initGallery();    	   
+    	   return true;
+       }   
+     
+       if(action.equals("chooesfiile")){
+    	   
+       }
         return false;
     }
+    
+/*private void initGallery() {
+        options = new DisplayImageOptions.Builder()
+                .showStubImage(R.drawable.stub_image)
+                .showImageForEmptyUri(R.drawable.image_for_empty_url)
+                .cacheInMemory().cacheOnDisc().build();
+ 
+        imageAdapter = new ImageAdapter(this, imageUrls);
+        GridView gridView = (GridView) findViewById(R.id.gridview);
+        gridView.setAdapter(imageAdapter);
+        // gridView.setOnItemClickListener(new OnItemClickListener() {
+        // @Override
+        // public void onItemClick(AdapterView<?> parent, View view,
+        // int position, long id) {
+        // startImageGalleryActivity(position);
+        // }
+        // });
+    }*/
+    
+    
 
-    protected void getPermission() {
-        cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
-    }
-    protected void launchActivity() throws JSONException {
-       // Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
-       //i.putExtra("options", this.args.optJSONObject(0).toString());
-       // this.cordova.getActivity().startActivity(i);
-        this.callbackContext.success("");
-    }
+protected void getPermission() {
+    cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
+}
+protected void launchActivity() throws JSONException {
+   // Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
+   //i.putExtra("options", this.args.optJSONObject(0).toString());
+   // this.cordova.getActivity().startActivity(i);
+   this.callbackContext.success("");
+}
+
    
-   private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext){
+private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext)
+	throws InterruptedException, JSONException {
+		  try {
+			   File dir = new File(dirName);
+			   if (!dir.exists()) {
+				   dir.mkdirs();
+			   }
+			   File file = new File(dirName, fileName);
+			   if (overwrite == true || !file.exists()) {
+				    Intent intent = new Intent ();
+				    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
+				    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				    NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
+				    Notification.Builder mBuilder =
+				         new Notification.Builder(cordova.getActivity())
+				         //.setContentTitle(cordova.getActivity().getString(R.string.app_name))
+				         .setContentText("File: " + fileName + " - 0%");
+				    int mNotificationId = new Random().nextInt(10000);
+				    URL url = new URL(fileUrl);
+				    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
+				    ucon.setRequestMethod("GET");
+				    ucon.connect();
+				    InputStream is = ucon.getInputStream();
+				    byte[] buffer = new byte[1024];
+				    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
+				    FileOutputStream fos = new FileOutputStream(file);
+				    showToast("Download started.","short");
+				    int step = 0;
+				    while ((readed = is.read(buffer)) > 0) {
+				     fos.write(buffer, 0, readed);
+				     totalReaded += readed;
+				     int newProgress = (int) (totalReaded*100/fileSize);
+				     if (newProgress != progress & newProgress > step) {
+				      mBuilder.setProgress(100, newProgress, false);
+				      mBuilder.setContentText("File: " + fileName + " - " + step + "%");
+				      mBuilder.setContentIntent(pend);
+				      mNotifyManager.notify(mNotificationId, mBuilder.build());
+				      step = step + 1;
+				     }
+			    }
+			    fos.flush();
+			    fos.close();
+			    is.close();
+			    ucon.disconnect();
+			    mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
+			             mNotifyManager.notify(mNotificationId, mBuilder.build());
+			             try {
+			                    Thread.sleep(1000);
+			                } catch (InterruptedException e) {
+			                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
+			                }
+			             mNotifyManager.cancel(mNotificationId);
+			    showToast("Download finished.","short");
+			   } else if (overwrite == false) {
+			    showToast("File is already downloaded.","short");
+			   }
+			   if(!file.exists()) {
+			    showToast("Download went wrong, please try again or contact the developer.","long");
+			    Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
+			   }
+			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+			   return true;
+		  } catch (FileNotFoundException e) {
+			   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
+			   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+			   e.printStackTrace();
+			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+			   return false;
+		  } catch (IOException e) {
+			   showToast("Error downloading file, please try again or contact the developer.","long");
+			   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+			   e.printStackTrace();
+			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+			   return false;
+		  }
 
-       try {
+       /*try {
     	   URL url = new URL(fileUrl);
     	   HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     	   InputStream inputStream = conn.getInputStream();
@@ -135,10 +281,9 @@ public class filepicker extends CordovaPlugin {
 	} catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}  
+	}  */
 
-	 return false ;
- }
+}
    
 public static byte[] readInputStream(InputStream inputStream) throws IOException {  
     byte[] buffer = new byte[1024];  
@@ -152,15 +297,11 @@ public static byte[] readInputStream(InputStream inputStream) throws IOException
 }     
    
    
-   
-   @SuppressWarnings("unused")
+@SuppressWarnings("unused")
 private void openFile(String url) throws IOException {
        // Create URI
        Uri uri = Uri.parse(url);
        Intent intent = null;
-       // Check what kind of file you are trying to open, by comparing the url with extensions.
-       // When the if condition is matched, plugin sets the correct intent (mime) type,
-       // so Android knew what application to use to open the file
 
        if (url.contains(".doc") || url.contains(".docx")) {
            // Word document
@@ -207,19 +348,10 @@ private void openFile(String url) throws IOException {
            intent = new Intent(Intent.ACTION_VIEW);
            intent.setDataAndType(uri, "video/*");
        }
-
-       //if you want you can also define the intent type for any other file
-
-       //additionally use else clause below, to manage other unknown extensions
-       //in this case, Android will show all applications installed on the device
-       //so you can choose which application to use
-
-
        else {            
        	intent = new Intent(Intent.ACTION_VIEW);
            intent.setDataAndType(uri, "*/*");
        }
-
        this.cordova.getActivity().startActivity(intent);
    } 
    
