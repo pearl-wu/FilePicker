@@ -116,6 +116,7 @@ public class filepicker extends CordovaPlugin {
        } 
        
        if(action.equals("chooespicture")){
+    	   Toast.makeText(cordova.getActivity(), "00000", Toast.LENGTH_LONG).show();
     	   this.callbackContext = callbackContext;
            this.params = args.getJSONObject(0);
            Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
@@ -382,6 +383,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
         } else {
             this.callbackContext.error("Error!");
         }
+        Toast.makeText(cordova.getActivity(), "onActivityResult", Toast.LENGTH_LONG).show();
     } catch (JSONException e) {
     }
 }  
