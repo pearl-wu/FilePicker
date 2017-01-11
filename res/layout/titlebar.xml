@@ -4,13 +4,13 @@
     android:layout_height="wrap_content"
     android:background="@drawable/top_bar" >
 
-    <TextView
+     <TextView
         android:id="@+id/tvTitleText"
         style="@style/title_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="Gallery" />
+        android:text="檔案瀏覽" /> 
 
 </FrameLayout>
