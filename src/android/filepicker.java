@@ -53,7 +53,6 @@ public class filepicker extends CordovaPlugin {
             } else {
                 this.getPermission();
             }
-            return true;
         }
        
        if (action.equals("get")) {
@@ -76,7 +75,6 @@ public class filepicker extends CordovaPlugin {
 			}
 	          }
          });
-         return true;
         }
        
        if(action.equals("find")){
@@ -89,7 +87,6 @@ public class filepicker extends CordovaPlugin {
     		   //showToast(filed.getAbsolutePath(),"short");
     		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK,dirName+fileUrl));
     	   }    	  
-    	  return true;
        }
        
        if(action.equals("openweb")){
@@ -99,7 +96,6 @@ public class filepicker extends CordovaPlugin {
     	   Uri uri = Uri.parse(webUrl);
     	   Intent intent = new Intent(Intent.ACTION_VIEW,uri);
     	   this.cordova.getActivity().startActivity(intent);
-    	  return true;
        } 
        
        if(action.equals("openfile")){
@@ -116,16 +112,15 @@ public class filepicker extends CordovaPlugin {
        } 
        
        if(action.equals("chooespicture")){
-    	   Toast.makeText(cordova.getActivity(), "00000", Toast.LENGTH_LONG).show();
-    	   this.callbackContext = callbackContext;
-           this.params = args.getJSONObject(0);
-           Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
-           int max = 15;
-           String cancelButtonText = "Cancel";
-           String okButtonText = "Done";
-           String titleText = "Gallery";
-           String errorMessageText = "Max limit reached!";
-           String type = "multiple";
+    	   	   this.callbackContext = callbackContext;
+               this.params = args.getJSONObject(0);
+               Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
+               int max = 15;
+               String cancelButtonText = "Cancel";
+               String okButtonText = "Done";
+               String titleText = "Gallery";
+               String errorMessageText = "Max limit reached!";
+               String type = "multiple";
                int requestCode=0;
 
                LOG.d(TAG, "params: " + params);
@@ -165,9 +160,7 @@ public class filepicker extends CordovaPlugin {
                }
        }   
      
-       if(action.equals("chooesfiile")){
-    	   
-       }
+       if(action.equals("chooesfiile")){}
         return false;
     }
  
@@ -357,7 +350,6 @@ private void openFile(String url) throws IOException {
        this.cordova.getActivity().startActivity(intent);
    } 
 
-
 public void onActivityResult(int requestCode, int resultCode, Intent data) {
     try {
         if (resultCode == Activity.RESULT_CANCELED) {
@@ -383,10 +375,9 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
         } else {
             this.callbackContext.error("Error!");
         }
-        Toast.makeText(cordova.getActivity(), "onActivityResult", Toast.LENGTH_LONG).show();
     } catch (JSONException e) {
     }
-}  
+}
    
  
  private void showToast(final String message, final String duration) {
