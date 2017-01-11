@@ -59,6 +59,7 @@
 		<source-file src="res/layout/titlebar.xml" target-dir="res/layout"/>
 		<source-file src="res/values-mdpi/colors.xml" target-dir="res/values"/>
 		<source-file src="res/values-mdpi/dimen.xml" target-dir="res/values"/>
-		<source-file src="res/values-mdpi/Multi_strings.xml" target-dir="res/values"/>
+		<source-file src="res/values-mdpi/styles.xml" target-dir="res/values"/>
+		<source-file src="res/values/Multi_strings.xml" target-dir="res/values"/>
 	</platform>
 </plugin>
