@@ -23,9 +23,9 @@ exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
 
-exports.chooespicture = function(message, win, fail){
-    if (!message) {
-        message = {};
+exports.chooespicture = function(options, win, fail){
+    if (!options) {
+        options = {};
     }
     
     var params = {
@@ -36,9 +36,7 @@ exports.chooespicture = function(message, win, fail){
         titleText: options.titleText ? options.titleText : "Gallery",
         errorMessageText: options.errorMessageText ? options.errorMessageText : "Max limit reached!"
     };
-    
-    
-    
+
     exec(win, fail, "filepicker", "chooespicture", [params]);
 }
 
