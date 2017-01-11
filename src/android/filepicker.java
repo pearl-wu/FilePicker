@@ -8,34 +8,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.LOG;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-
-import tw.com.bais.ichat.R;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
@@ -46,10 +38,9 @@ public class filepicker extends CordovaPlugin {
     protected JSONArray args;
     protected CallbackContext callbackContext;
     public LayoutInflater mInflater;
-    
-    private ArrayList<String> imageUrls;
-    private DisplayImageOptions options;
-    //private ImageAdapter imageAdapter;
+
+    public static String TAG = "MultiImageSelector";
+    private JSONObject params;
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -125,24 +116,52 @@ public class filepicker extends CordovaPlugin {
        } 
        
        if(action.equals("chooespicture")){
-    	   this.imageUrls = new ArrayList<String>();
-    	   final String[] columns = { MediaStore.Images.Media.DATA,MediaStore.Images.Media._ID };
-    	   final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-    	   Cursor imagecursor = this
-    			   .cordova.getActivity().getApplicationContext()
-                   .getContentResolver()
-                   .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
-                           null, null, orderBy + " DESC");
-    	   
-    	   for (int i = 0; i < imagecursor.getCount(); i++) {
-               imagecursor.moveToPosition(i);
-               int dataColumnIndex = imagecursor
-                       .getColumnIndex(MediaStore.Images.Media.DATA);
-               imageUrls.add(imagecursor.getString(dataColumnIndex));
-               Log.i("imageUrl", imageUrls.get(i));
-    	   }
-    	   //initGallery();    	   
-    	   return true;
+    	   this.callbackContext = callbackContext;
+           this.params = args.getJSONObject(0);
+           Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
+           int max = 15;
+           String cancelButtonText = "Cancel";
+           String okButtonText = "Done";
+           String titleText = "Gallery";
+           String errorMessageText = "Max limit reached!";
+           String type = "multiple";
+               int requestCode=0;
+
+               LOG.d(TAG, "params: " + params);
+               if (this.params.has("limit")) {
+                   max = this.params.getInt("limit");
+               }
+               if (this.params.has("cancelButtonText")) {
+                   cancelButtonText = this.params.getString("cancelButtonText");
+               }
+               if (this.params.has("okButtonText")) {
+                   okButtonText = this.params.getString("okButtonText");
+               }
+               if (this.params.has("titleText")) {
+                   titleText = this.params.getString("titleText");
+               }
+               if (this.params.has("errorMessageText")) {
+                   errorMessageText = this.params.getString("errorMessageText");
+               }
+               if (this.params.has("type")) {
+                   type = this.params.getString("type");
+               }
+               intent.putExtra("limit", max);
+               intent.putExtra("cancelButtonText", cancelButtonText);
+               intent.putExtra("okButtonText", okButtonText);
+               intent.putExtra("titleText", titleText);
+               intent.putExtra("errorMessageText", errorMessageText);
+               if (type.equalsIgnoreCase("multiple")) {
+                   intent.putExtra("action", "luminous.ACTION_MULTIPLE_PICK");
+                   requestCode=200;
+               } else {
+                   intent.putExtra("action", "luminous.ACTION_PICK");
+                   requestCode=100;
+               }
+               if (this.cordova != null) {
+                   Utility.loadResourceIds(cordova.getActivity());
+                   this.cordova.startActivityForResult((CordovaPlugin) this, intent, requestCode);
+               }
        }   
      
        if(action.equals("chooesfiile")){
@@ -150,25 +169,7 @@ public class filepicker extends CordovaPlugin {
        }
         return false;
     }
-    
-/*private void initGallery() {
-        options = new DisplayImageOptions.Builder()
-                .showStubImage(R.drawable.stub_image)
-                .showImageForEmptyUri(R.drawable.image_for_empty_url)
-                .cacheInMemory().cacheOnDisc().build();
  
-        imageAdapter = new ImageAdapter(this, imageUrls);
-        GridView gridView = (GridView) findViewById(R.id.gridview);
-        gridView.setAdapter(imageAdapter);
-        // gridView.setOnItemClickListener(new OnItemClickListener() {
-        // @Override
-        // public void onItemClick(AdapterView<?> parent, View view,
-        // int position, long id) {
-        // startImageGalleryActivity(position);
-        // }
-        // });
-    }*/
-    
     
 
 protected void getPermission() {
@@ -354,7 +355,36 @@ private void openFile(String url) throws IOException {
        }
        this.cordova.getActivity().startActivity(intent);
    } 
-   
+
+
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    try {
+        if (resultCode == Activity.RESULT_CANCELED) {
+            JSONObject res = new JSONObject();
+            res.put("cancelled", true);
+            this.callbackContext.success(res);
+        } else if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
+            String single_path = data.getStringExtra("single_path");
+            JSONObject res = new JSONObject();
+            res.put("cancelled", false);
+            res.put("path", single_path);
+            this.callbackContext.success(res);
+        } else if (requestCode == 200 && resultCode == Activity.RESULT_OK) {
+            String[] fileNames = data.getStringArrayExtra("all_path");
+            JSONArray p = new JSONArray();
+            for(int i = 0;i < fileNames.length; i++) {
+                p.put(fileNames[i]);
+            }
+            JSONObject res = new JSONObject();
+            res.put("cancelled", false);
+            res.put("paths", p);
+            this.callbackContext.success(res);
+        } else {
+            this.callbackContext.error("Error!");
+        }
+    } catch (JSONException e) {
+    }
+}  
    
  
  private void showToast(final String message, final String duration) {
