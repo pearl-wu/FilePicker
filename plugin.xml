@@ -14,6 +14,7 @@
 		<!--<config-file parent="/*" target="AndroidManifest.xml" />-->
 
 	<config-file target="AndroidManifest.xml" parent="/manifest/application">
+           <activity android:name="com.bais.filepicker.filepicker"/>
 	   <activity android:label="Gallery" android:name="com.bais.filepicker.CustomGalleryActivity">
 		<intent-filter>
 		<action android:name="luminous.ACTION_PICK" />
