@@ -23,7 +23,7 @@ exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
 
-exports.chooespicture = function(success, fail, options) {
+exports.choosepicture = function(success, fail, options) {
     if (!options) {
         options = {};
     }    
@@ -35,7 +35,7 @@ exports.chooespicture = function(success, fail, options) {
         titleText: options.titleText ? options.titleText : "Gallery",
         errorMessageText: options.errorMessageText ? options.errorMessageText : "Max limit reached!"
     };
-    return cordova.exec(success, fail, "filepicker", "chooespicture", [params]);
+    return cordova.exec(success, fail, "filepicker", "choosepicture", [params]);
 };
 
 exports.chooesfiile = function(message, win, fail){
