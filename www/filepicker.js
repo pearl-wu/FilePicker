@@ -23,7 +23,7 @@ exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
 
-exports.choosepicture = function(success, fail, options) {
+exports.choosepicture = function(win, fail, options) {
     if (!options) {
         options = {};
     }    
