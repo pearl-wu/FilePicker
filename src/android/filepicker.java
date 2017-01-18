@@ -36,23 +36,25 @@ public class filepicker extends CordovaPlugin {
     public static final String READ = Manifest.permission.READ_EXTERNAL_STORAGE;
     public static final int REQ_CODE = 0;
     protected JSONArray args;
-    protected CallbackContext callbackContext;
     public LayoutInflater mInflater;
 
-    public static String TAG = "MultiImageSelector";
+    private CallbackContext callbackContext;
     private JSONObject params;
+    
+    public static String TAG = "MultiImageSelector";
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    	this.callbackContext = callbackContext;
+    	
         if (action.equals("start")) {
             this.args = args;
-            this.callbackContext = callbackContext;
-
             if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
                 this.launchActivity();
             } else {
                 this.getPermission();
             }
+            return true;
         }
        
        if (action.equals("get")) {
@@ -75,6 +77,7 @@ public class filepicker extends CordovaPlugin {
 			}
 	          }
          });
+         return true;
         }
        
        if(action.equals("find")){
@@ -86,7 +89,8 @@ public class filepicker extends CordovaPlugin {
     	   if(filed.exists()){
     		   //showToast(filed.getAbsolutePath(),"short");
     		   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK,dirName+fileUrl));
-    	   }    	  
+    	   }  
+    	   return true;
        }
        
        if(action.equals("openweb")){
@@ -96,15 +100,15 @@ public class filepicker extends CordovaPlugin {
     	   Uri uri = Uri.parse(webUrl);
     	   Intent intent = new Intent(Intent.ACTION_VIEW,uri);
     	   this.cordova.getActivity().startActivity(intent);
+    	   return true;
        } 
        
        if(action.equals("openfile")){
     	   JSONObject params = args.getJSONObject(0);
     	   String fileUrl = params.getString("url");
-    	   PluginResult.Status status = PluginResult.Status.OK;
            try{
                openFile(fileUrl);
-               callbackContext.sendPluginResult(new PluginResult(status));
+               callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
                return true;
            }catch(IOException e){
                return false;
@@ -156,7 +160,9 @@ public class filepicker extends CordovaPlugin {
                if (this.cordova != null) {
                    Utility.loadResourceIds(cordova.getActivity());
                    this.cordova.startActivityForResult((CordovaPlugin) this, intent, requestCode);
+                  ///cordova.getActivity().startActivityForResult(intent, requestCode);
                }
+    	   return true;
        }   
      
        if(action.equals("chooesfiile")){}
@@ -350,16 +356,18 @@ private void openFile(String url) throws IOException {
    } 
 
 public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    try {
+   try {
         if (resultCode == Activity.RESULT_CANCELED) {
             JSONObject res = new JSONObject();
             res.put("cancelled", true);
+            //showToast("Activity.RESULT_CANCELED","");
             this.callbackContext.success(res);
         } else if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
             String single_path = data.getStringExtra("single_path");
             JSONObject res = new JSONObject();
             res.put("cancelled", false);
             res.put("path", single_path);
+            //showToast("Activity.RESULT_OK","");
             this.callbackContext.success(res);
         } else if (requestCode == 200 && resultCode == Activity.RESULT_OK) {
             String[] fileNames = data.getStringArrayExtra("all_path");
@@ -370,12 +378,12 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
             JSONObject res = new JSONObject();
             res.put("cancelled", false);
             res.put("paths", p);
+            //showToast("Activity.RESULT_OK","");
             this.callbackContext.success(res);
         } else {
-            this.callbackContext.error("Error!");
+        	this.callbackContext.error("run error"+resultCode);
         }
-    } catch (JSONException e) {
-    }
+    } catch (JSONException e) {}
 }
    
  
