@@ -35,7 +35,7 @@ exports.choosepicture = function(win, fail, options) {
         titleText: options.titleText ? options.titleText : "Gallery",
         errorMessageText: options.errorMessageText ? options.errorMessageText : "Max limit reached!"
     };
-    return cordova.exec(win, fail, "filepicker", "choosepicture", [params]);
+    exec(win, fail, "filepicker", "choosepicture", [params]);
 };
 
 exports.chooesfiile = function(message, win, fail){
