@@ -112,7 +112,6 @@ public class filepicker extends CordovaPlugin {
        } 
        
        if(action.equals("choosepicture")){
-    	       this.callbackContext = callbackContext;
                this.params = args.getJSONObject(0);
                Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
                int max = 15;
