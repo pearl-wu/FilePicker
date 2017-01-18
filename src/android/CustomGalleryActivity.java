@@ -76,6 +76,7 @@ public class CustomGalleryActivity extends Activity {
     private void initImageLoader() {
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(this)
 		.threadPoolSize(12)
+		.memoryCacheExtraOptions(1920, 1080)
 		.threadPriority(Thread.NORM_PRIORITY - 2)
 		.memoryCacheSize(1500000) // 1.5 Mb
 		.denyCacheImageMultipleSizesInMemory()
