@@ -42,6 +42,7 @@
 		<source-file src="src/android/CustomGalleryActivity.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="src/android/GalleryAdapter.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="src/android/Utility.java" target-dir="src/com/bais/filepicker/" />
+		<source-file src="src/android/CustomfileActivity.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="libs/universal-image-loader-1.9.5.jar" target-dir="libs/" />
 		
 		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
