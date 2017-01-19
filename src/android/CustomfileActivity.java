@@ -1,38 +1,52 @@
 package com.bais.filepicker;
 
+import java.io.File;
+import java.util.ArrayList;
+
+import com.orleonsoft.android.simplefilechooser.Constants;
+
+import am.armsoft.data.Category;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 
 public class CustomfileActivity extends ListActivity implements OnItemClickListener {
 	
+	private File currentFolder;
+	private ArrayList<String> extensions;
 	Context _context;
+	Category currentCategory;
 
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		
-		int main = this.getResources().getIdentifier("main", "layout", this.getPackageName());
-		int internal = this.getResources().getIdentifier("internal", "string", this.getPackageName());
-		int drawer_layout = this.getResources().getIdentifier("drawer_layout", "id", this.getPackageName());
-		int letf_drawer = this.getResources().getIdentifier("left_drawer", "id", this.getPackageName());
-		int drawer_shadow = this.getResources().getIdentifier("drawer_shadow", "drawable", this.getPackageName());
-		int drawer_open = this.getResources().getIdentifier("drawer_open", "string", this.getPackageName());
-		int drawer_close = this.getResources().getIdentifier("drawer_close", "string", this.getPackageName());
-		
+		int main = this.getResources().getIdentifier("multiselectorfile", "layout", this.getPackageName());
+
 		setContentView(main);
 		getActionBar().setDisplayHomeAsUpEnabled(false);
 		getActionBar().setHomeButtonEnabled(false);
 		_context =  this;
+		
 		Bundle extras = getIntent().getExtras();
-		if( extras != null ){
-			Toast.makeText(_context, extras+"", Toast.LENGTH_SHORT).show();
+		if (extras != null) {
+			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
+				extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);
+				Toast.makeText(_context, extensions.toString(), Toast.LENGTH_LONG).show();
+				FileUtils.getSpecificTypeOfFile(_context, new String[]{extensions.toString()});
+			}			
 		}
 		
+		currentFolder = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+		currentCategory = new Category();
+		currentCategory.path = currentFolder.getAbsolutePath(); 
+		
+		
+			
 	}
 
 	@Override
