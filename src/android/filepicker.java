@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.cordova.CordovaPlugin;
@@ -17,12 +18,12 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.Manifest;
+import com.orleonsoft.android.simplefilechooser.Constants;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -31,37 +32,22 @@ import android.view.LayoutInflater;
 import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
-   //public static final int PERMISSION_DENIED_ERROR = 20;
-    public static final String WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-    public static final String READ = Manifest.permission.READ_EXTERNAL_STORAGE;
-    public static final int REQ_CODE = 0;
-    protected JSONArray args;
-    public LayoutInflater mInflater;
-
+	
+	private static final int REQ_CODE = 0;
     private CallbackContext callbackContext;
-    private JSONObject params;
-    
-    public static String TAG = "MultiImageSelector";
+    private JSONObject params; 
+    private ArrayList<String> exts;
+    private static String PTAG = "MultiImageSelector";
+    private static final String FTAG = "MFileChooser";
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    	this.callbackContext = callbackContext;
-    	
-        if (action.equals("start")) {
-            this.args = args;
-            if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
-                this.launchActivity();
-            } else {
-                this.getPermission();
-            }
-            return true;
-        }
-       
+       this.callbackContext = callbackContext;
        if (action.equals("get")) {
-         cordova.getThreadPool().execute(new Runnable() {
+         cordova.getThreadPool().execute(new Runnable(){
 	          public void run() {
 	           try {
-		            JSONObject params = args.getJSONObject(0);
+	        	    params = args.getJSONObject(0);
 		            String fileUrl=params.getString("url");
 		            Boolean overwrite=params.getBoolean("overwrite");
 		            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
@@ -81,7 +67,7 @@ public class filepicker extends CordovaPlugin {
         }
        
        if(action.equals("find")){
-    	   JSONObject params = args.getJSONObject(0);
+    	   this.params = args.getJSONObject(0);
     	   String fileUrl = params.getString("url");
     	   fileUrl = fileUrl.replaceAll("\\s*|\t|\r|\n", "");
     	   String dirName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/";
@@ -94,7 +80,7 @@ public class filepicker extends CordovaPlugin {
        }
        
        if(action.equals("openweb")){
-    	   JSONObject params = args.getJSONObject(0);
+    	   this.params = args.getJSONObject(0);
     	   String webUrl = params.getString("url");
     	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
     	   Uri uri = Uri.parse(webUrl);
@@ -104,7 +90,7 @@ public class filepicker extends CordovaPlugin {
        } 
        
        if(action.equals("openfile")){
-    	   JSONObject params = args.getJSONObject(0);
+    	   this.params = args.getJSONObject(0);
     	   String fileUrl = params.getString("url");
            try{
                openFile(fileUrl);
@@ -126,7 +112,7 @@ public class filepicker extends CordovaPlugin {
                String type = "multiple";
                int requestCode=0;
 
-               LOG.d(TAG, "params: " + params);
+               LOG.d(PTAG, "params: " + params);
                if (this.params.has("limit")) {
                    max = this.params.getInt("limit");
                }
@@ -165,20 +151,29 @@ public class filepicker extends CordovaPlugin {
     	   return true;
        }   
      
-       if(action.equals("chooesfiile")){}
+       if(action.equals("chooesfiile")){
+    	   exts = new ArrayList<String>();
+    	   int count = args.length();
+    	   for(int i = 0;i<count;i++){
+           	exts.add(args.getString(i).toLowerCase());
+           }
+	        chooseFile(callbackContext,exts);
+	        return true;
+       }
         return false;
     }
- 
     
-
-protected void getPermission() {
-    cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
-}
-protected void launchActivity() throws JSONException {
-   // Intent i = new Intent(this.cordova.getActivity(), com.sarriaroman.PhotoViewer.PhotoActivity.class);
-   //i.putExtra("options", this.args.optJSONObject(0).toString());
-   // this.cordova.getActivity().startActivity(i);
-   this.callbackContext.success("");
+public void chooseFile(CallbackContext callbackContext, ArrayList<String> ext) {
+   Context context=this.cordova.getActivity().getApplicationContext();
+   Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+   intent.setClass(context,CustomfileActivity.class);
+   if(ext.size()>0){
+     intent.putStringArrayListExtra(Constants.KEY_FILTER_FILES_EXTENSIONS, ext);
+   }
+   cordova.startActivityForResult(this, intent, 1);
+   PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+   pluginResult.setKeepCallback(true);
+   callbackContext.sendPluginResult(pluginResult);
 }
 
    
@@ -400,4 +395,5 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
    }
   });
  }  
+ 
 }
