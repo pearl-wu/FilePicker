@@ -22,7 +22,7 @@
 		<category android:name="android.intent.category.DEFAULT" />
 		</intent-filter>
             </activity>
-	    <activity android:name="com.bais.filepicker.CustomfileActivity" />
+	    <activity android:exported="true" android:label="@string/app_name" android:name="com.bais.filepicker.CustomfileActivity" android:screenOrientation="portrait" />
         </config-file>
 
 		<config-file parent="/manifest" target="AndroidManifest.xml">
