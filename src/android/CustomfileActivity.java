@@ -25,14 +25,12 @@ public class CustomfileActivity extends ListActivity implements OnItemClickListe
 
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		int main = this.getResources().getIdentifier("multiselectorfile", "layout", this.getPackageName());
-
-		setContentView(main);
-		getActionBar().setDisplayHomeAsUpEnabled(false);
-		getActionBar().setHomeButtonEnabled(false);
-		_context =  this;
 		
-		Bundle extras = getIntent().getExtras();
+		String PACKAGE_NAME = getPackageName();
+		int main = getResources().getIdentifier("multiselectorfile", "layout",  PACKAGE_NAME);
+		setContentView(main);
+				
+		/*Bundle extras = getIntent().getExtras();	
 		if (extras != null) {
 			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
 				extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);
@@ -43,9 +41,7 @@ public class CustomfileActivity extends ListActivity implements OnItemClickListe
 		
 		currentFolder = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 		currentCategory = new Category();
-		currentCategory.path = currentFolder.getAbsolutePath(); 
-		
-		
+		currentCategory.path = currentFolder.getAbsolutePath(); */		
 			
 	}
 
