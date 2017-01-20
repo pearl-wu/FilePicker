@@ -38,6 +38,6 @@ exports.choosepicture = function(win, fail, options) {
     exec(win, fail, "filepicker", "choosepicture", [params]);
 };
 
-exports.chooesfiile = function(messages, win, fail){
-    exec(win, fail, "filepicker", "chooesfiile", messages);
+exports.chooesfiile = function(params, win, fail){
+    exec(win, fail, "filepicker", "chooesfiile", params);
 }
