@@ -43,5 +43,5 @@ exports.chooesfiile = function(message, win, fail){
         message = [];
     } 
     
-    exec(win, fail, "filepicker", "chooesfiile", [{tage: message}]);
+    exec(win, fail, "filepicker", "chooesfiile", message);
 }
