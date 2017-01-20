@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 public class FileUtils {
 	 public static void getSpecificTypeOfFile(Context context,String[] extension){  
-
+		 
 	        Uri fileUri=Files.getContentUri("external");  
 	        String[] projection=new String[]{  
 	                FileColumns.DATA,FileColumns.TITLE  
@@ -23,7 +23,8 @@ public class FileUtils {
 	            {  
 	                selection=selection+" OR ";  
 	            }  
-	            selection=selection+FileColumns.DATA+" LIKE '%"+extension[i]+"'";  
+	            selection=selection+FileColumns.DATA+" LIKE '%"+extension[i]+"'"; 
+	            //Toast.makeText(context, extension[i], Toast.LENGTH_LONG).show();
 	        }  
 	        String sortOrder=FileColumns.DATE_MODIFIED;  
 	        ContentResolver resolver=context.getContentResolver();  

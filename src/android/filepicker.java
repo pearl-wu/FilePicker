@@ -155,7 +155,8 @@ public class filepicker extends CordovaPlugin {
     	   exts = new ArrayList<String>();
     	   int count = args.length();
     	   for(int i = 0;i<count;i++){
-           	exts.add(args.getString(i).toLowerCase());
+    		   Toast.makeText(cordova.getActivity(), "1111---"+args.getJSONArray(i).toString(), Toast.LENGTH_LONG).show();
+           	   exts.add(args.getString(i));
            }
 	        chooseFile(callbackContext,exts);
 	        return true;
