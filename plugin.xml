@@ -22,8 +22,7 @@
 		<category android:name="android.intent.category.DEFAULT" />
 		</intent-filter>
             </activity>
-	    <activity android:name="com.bais.filepicker.CustomfileActivity">
-           </activity>
+	    <activity android:name="com.bais.filepicker.CustomfileActivity" />
         </config-file>
 
 		<config-file parent="/manifest" target="AndroidManifest.xml">
