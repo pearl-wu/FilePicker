@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:theme="@style/AppTheme.NoActionBar"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
     
     <include
         android:layout_width="fill_parent"
