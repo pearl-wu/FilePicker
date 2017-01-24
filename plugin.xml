@@ -23,6 +23,7 @@
 		</intent-filter>
             </activity>
 	    <activity android:name="com.bais.filepicker.CustomfileActivity" />
+	    <activity android:name="com.bais.filepicker.PhotoActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
         </config-file>
 
 		<config-file parent="/manifest" target="AndroidManifest.xml">
