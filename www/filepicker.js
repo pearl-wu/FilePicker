@@ -45,3 +45,15 @@ exports.chooesfiile = function(message, win, fail){
     
     exec(win, fail, "filepicker", "chooesfiile", message);
 }
+
+exports.photoveiw = function(url, title, options){
+    if( title == undefined ) {
+      title = '';
+    }
+
+    if(typeof options == "undefined"){
+        options = {};
+    } 
+    
+    exec(function(){}, function(){}, "filepicker", "show", [url, title, options]);
+}
