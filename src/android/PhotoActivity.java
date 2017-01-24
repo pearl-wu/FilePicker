@@ -253,9 +253,5 @@ public class PhotoActivity extends Activity {
 				return file;
 			}
 		}		
-	}
-
-	public static void main(String[] args) {
-		args
 	}	
 }
