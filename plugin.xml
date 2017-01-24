@@ -45,6 +45,7 @@
 		<source-file src="src/android/PhotoActivity.java" target-dir="src/com/bais/filepicker/" />
 		<source-file src="libs/universal-image-loader-1.9.5.jar" target-dir="libs/" />
 		<source-file src="libs/picasso-2.5.2.jar" target-dir="libs/" />
+		<source-file src="libs/photoview-library-1.2.2.jar" target-dir="libs/" />
 		
 		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
 		<source-file src="res/drawable/check_icon.png" target-dir="res/drawable"/>
