@@ -19,6 +19,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.orleonsoft.android.simplefilechooser.Constants;
+
+import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -32,17 +34,20 @@ import android.view.LayoutInflater;
 import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
-	
-	private static final int REQ_CODE = 0;
     private CallbackContext callbackContext;
     private JSONObject params; 
     private ArrayList<String> exts;
     private static String PTAG = "MultiImageSelector";
     private static final String FTAG = "MFileChooser";
-
+    private static final String WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    private static final String READ = Manifest.permission.READ_EXTERNAL_STORAGE;
+    private static final int REQ_CODE = 0;
+    
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
        this.callbackContext = callbackContext;
+       
+       
        if (action.equals("get")) {
          cordova.getThreadPool().execute(new Runnable(){
 	          public void run() {
@@ -154,15 +159,31 @@ public class filepicker extends CordovaPlugin {
        if(action.equals("chooesfiile")){
     	   exts = new ArrayList<String>();
     	   int count = args.length();
-    	   Toast.makeText(cordova.getActivity(), count, Toast.LENGTH_LONG).show();
     	   for(int i = 0;i<count;i++){
            	   exts.add(args.getString(i).toLowerCase());
            }
 	        chooseFile(callbackContext,exts);
 	        return true;
        }
+       
+       if (action.equals("show")) {
+           if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
+        	   Intent i = new Intent(cordova.getActivity(), PhotoActivity.class);
+        	   i.putExtra("url", args.getString(0));
+        	   i.putExtra("title", args.getString(1));
+        	   i.putExtra("options", args.optJSONObject(2).toString());
+
+        	   cordova.getActivity().startActivity(i);
+        	   callbackContext.success("");
+           } else {
+        	   cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
+           }
+           return true;
+       }       
+       
         return false;
     }
+   
     
 public void chooseFile(CallbackContext callbackContext, ArrayList<String> ext) {
    Context context=this.cordova.getActivity().getApplicationContext();
@@ -253,32 +274,6 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 			   return false;
 		  }
-
-       /*try {
-    	   URL url = new URL(fileUrl);
-    	   HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    	   InputStream inputStream = conn.getInputStream();
-    	   byte[] getData = readInputStream(inputStream);
-    	   
-    	   File saveDir = new File(dirName);  
-           if (!saveDir.exists()) {  
-               saveDir.mkdir();  
-           }  
-           File file = new File(saveDir + File.separator + fileName);  
-           FileOutputStream fos = new FileOutputStream(file);  
-           fos.write(getData);  
-           if (fos != null) {  
-               fos.close();  
-           }  
-           if (inputStream != null) {  
-               inputStream.close();  
-           } 
-           Toast.makeText(cordova.getActivity(), "info:" + url + " download success", Toast.LENGTH_LONG).show();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}  */
-
 }
    
 public static byte[] readInputStream(InputStream inputStream) throws IOException {  
@@ -290,8 +285,7 @@ public static byte[] readInputStream(InputStream inputStream) throws IOException
        }  
     bos.close();  
     return bos.toByteArray();  
-}     
-   
+}
    
 @SuppressWarnings("unused")
 private void openFile(String url) throws IOException {
