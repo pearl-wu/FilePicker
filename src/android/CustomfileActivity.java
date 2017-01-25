@@ -37,10 +37,10 @@ public class CustomfileActivity extends Activity{
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(Utility.main);
+	    int main = this.getResources().getIdentifier("multiselectorfile", "layout", this.getPackageName());
+		setContentView(main);
 				
-		/*Bundle extras = getIntent().getExtras();	
+		Bundle extras = getIntent().getExtras();	
 		if (extras != null) {
 			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
 				extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);				
@@ -62,21 +62,18 @@ public class CustomfileActivity extends Activity{
 		        ContentResolver resolver = this.getContentResolver();  
 		        Cursor cursor = resolver.query(fileUri, projection, selection, null, sortOrder);  
 
-		        if(cursor == null)  
+		          if(cursor == null)  
 		            return;  
 		        if(cursor.moveToLast()){ 
 		        	List<HashMap<String, Object>> fillMaps;
-		        	String[] from = new String[] { "icon", "filename", "filesize" };
-		            int[] to = new int[] {icong, fline, sline };		        	
+	        	
 		            do{
 		                String data = cursor.getString(0);
-		                Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+		                //Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
 		                File filePath=new File(data);
 		                String filename = filePath.getName();
-		                Toast.makeText(this, filename, Toast.LENGTH_SHORT).show();
-		                Toast.makeText(this, FormaetfileSize(filePath.length()), Toast.LENGTH_SHORT).show();
-		                
-		                
+		                //Toast.makeText(this, filename, Toast.LENGTH_SHORT).show();
+
 		                fillMaps = new ArrayList<HashMap<String, Object>>();
 
 		                HashMap<String, Object> map = new HashMap<String, Object>();
@@ -88,13 +85,25 @@ public class CustomfileActivity extends Activity{
 
 		            }while(cursor.moveToPrevious()); 
 		            
-	              SimpleAdapter adapter = new SimpleAdapter(this, fillMaps, lists, from, to);
-	              setListAdapter(adapter);
+		    	    int main_item = this.getResources().getIdentifier("multiselectorfile_item", "layout", this.getPackageName());
+		    	    int lists = this.getResources().getIdentifier("list", "id", this.getPackageName());
+		    	    int icong = this.getResources().getIdentifier("icon", "id", this.getPackageName());
+		    	    int sline = this.getResources().getIdentifier("secondLine", "id", this.getPackageName());
+		    	    int fline = this.getResources().getIdentifier("firstLine", "id", this.getPackageName());
+		        	String[] from = new String[] { "icon", "filename", "filesize" };
+		            int[] to = new int[] {icong, fline, sline };	
+		            
+		          	            
+		            
+		            listView = (ListView)findViewById(lists);
+		            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), fillMaps, main_item, new String[] {}, new int[]{});
+		            Toast.makeText(this, lists+"", Toast.LENGTH_SHORT).show();	
+		            //listView.setAdapter(adapter);
 	               
 		        }  
 		        cursor.close();
 			}			
-		}*/
+		}
 	}
 	
 
