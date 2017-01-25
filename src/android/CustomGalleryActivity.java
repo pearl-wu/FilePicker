@@ -1,122 +1,268 @@
 package com.bais.filepicker;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.orleonsoft.android.simplefilechooser.Constants;
-
-import am.armsoft.data.Category;
 import android.app.Activity;
-import android.app.ListActivity;
-import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.net.Uri;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Files.FileColumns;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
-public class CustomfileActivity extends Activity{
-	
-	private ArrayList<String> extensions = new ArrayList<>();
-	Category currentCategory;
-	String record = "";
-	ListView listView;
+import java.util.ArrayList;
+import java.util.Collections;
 
-	public void onCreate(Bundle savedInstanceState){
+public class CustomGalleryActivity extends Activity {
+
+	GridView gridGallery;
+	Handler handler;
+	GalleryAdapter adapter;
+
+	ImageView imgNoMedia;
+	Button btnGalleryOk;
+	Button btnGalleryCancel;
+	TextView galleryTitle;
+
+	String action;
+	String okButtonText = null;
+	String cancelButtonText = null;
+	String titleText = null;
+	String errorMessageText = null;
+	Integer limit = 5;
+    private ImageLoader imageLoader;
+
+    @Override
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-	    int main = this.getResources().getIdentifier("multiselectorfile", "layout", this.getPackageName());
-		setContentView(main);
-				
-		Bundle extras = getIntent().getExtras();	
-		if (extras != null) {
-			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
-				extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);				
-				Uri fileUri = Files.getContentUri("external");  
-		        String[] projection = new String[]{  
-		              FileColumns.DATA,FileColumns.TITLE  
-		        };
-		        String selection = "";  
-		        for(int i=0;i<extensions.size();i++)  
-		        {  
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		//setContentView(R.layout.gallery);
+		setContentView(Utility.resId_galleryLayout);
 
-		            if(i!=0)  
-		            {  
-		                selection = selection+" OR ";  
-		            }  
-		            selection = selection+FileColumns.DATA+" LIKE '%"+extensions.get(i)+"'";
-		        }  
-		        String sortOrder = FileColumns.DATE_MODIFIED;  
-		        ContentResolver resolver = this.getContentResolver();  
-		        Cursor cursor = resolver.query(fileUri, projection, selection, null, sortOrder);  
+		action = getIntent().getAction();
+		Bundle extras = getIntent().getExtras();
+		if(extras != null){
+			cancelButtonText = extras.getString("cancelButtonText");
+			okButtonText = extras.getString("okButtonText");
+			titleText = extras.getString("titleText");
+			errorMessageText = extras.getString("errorMessageText");
+			limit = extras.getInt("limit", 15);
+			action = extras.getString("action");
+		}
 
-		          if(cursor == null)  
-		            return;  
-		        if(cursor.moveToLast()){ 
-		        	List<HashMap<String, Object>> fillMaps;
-	        	
-		            do{
-		                String data = cursor.getString(0);
-		                //Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
-		                File filePath=new File(data);
-		                String filename = filePath.getName();
-		                //Toast.makeText(this, filename, Toast.LENGTH_SHORT).show();
+		if (action == null) {
+			finish();
+		}
+        initImageLoader();
+		init();
+	}
 
-		                fillMaps = new ArrayList<HashMap<String, Object>>();
+    private void initImageLoader() {
+        ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(this)
+		.threadPoolSize(12)
+		.memoryCacheExtraOptions(1920, 1080)
+		.threadPriority(Thread.NORM_PRIORITY - 2)
+		.memoryCacheSize(1500000) // 1.5 Mb
+		.denyCacheImageMultipleSizesInMemory()
+		.memoryCache(new WeakMemoryCache())
+		.discCacheFileNameGenerator(new Md5FileNameGenerator());
 
-		                HashMap<String, Object> map = new HashMap<String, Object>();
-		                map.put("filetapy", filename.substring(filename.lastIndexOf(".")+1));
-		                map.put("filename", filename); 
-		                map.put("filesize", FormaetfileSize(filePath.length())); 
-		                map.put("url",data);
-		                fillMaps.add(map);
+        ImageLoaderConfiguration config = builder.build();
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(config);
+    }
 
-		            }while(cursor.moveToPrevious()); 
-		            
-		    	    int main_item = this.getResources().getIdentifier("multiselectorfile_item", "layout", this.getPackageName());
-		    	    int lists = this.getResources().getIdentifier("list", "id", this.getPackageName());
-		    	    int icong = this.getResources().getIdentifier("icon", "id", this.getPackageName());
-		    	    int sline = this.getResources().getIdentifier("secondLine", "id", this.getPackageName());
-		    	    int fline = this.getResources().getIdentifier("firstLine", "id", this.getPackageName());
-		        	String[] from = new String[] { "icon", "filename", "filesize" };
-		            int[] to = new int[] {icong, fline, sline };	
-		            
-		          	            
-		            
-		            listView = (ListView)findViewById(lists);
-		            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), fillMaps, main_item, new String[] {}, new int[]{});
-		            Toast.makeText(this, lists+"", Toast.LENGTH_SHORT).show();	
-		            //listView.setAdapter(adapter);
-	               
-		        }  
-		        cursor.close();
-			}			
+	private void init() {
+
+		handler = new Handler();
+		//gridGallery = (GridView) findViewById(R.id.gridGallery);
+		gridGallery = (GridView) findViewById(Utility.resId_gridGallery);
+		gridGallery.setFastScrollEnabled(true);
+		adapter = new GalleryAdapter(getApplicationContext(), imageLoader, errorMessageText);
+
+		if (action.equalsIgnoreCase(Action.ACTION_MULTIPLE_PICK)) {
+
+			//findViewById(R.id.llBottomContainer).setVisibility(View.VISIBLE);
+			findViewById(Utility.resId_bottomContainer).setVisibility(View.VISIBLE);
+			gridGallery.setOnItemClickListener(mItemMulClickListener);
+			adapter.setMultiplePick(true);
+
+		} else if (action.equalsIgnoreCase(Action.ACTION_PICK)) {
+
+			//findViewById(R.id.llBottomContainer).setVisibility(View.GONE);
+			findViewById(Utility.resId_bottomContainer).setVisibility(View.GONE);
+			gridGallery.setOnItemClickListener(mItemSingleClickListener);
+			adapter.setMultiplePick(false);
+
+		}
+
+		gridGallery.setAdapter(adapter);
+		//imgNoMedia = (ImageView) findViewById(R.id.imgNoMedia);
+		imgNoMedia = (ImageView) findViewById(Utility.resId_imgNoMedia);
+		
+		//btnGalleryOk = (Button) findViewById(R.id.btnGalleryOk);
+		btnGalleryOk = (Button) findViewById(Utility.resId_btnGalleryOk);
+		//btnGalleryCancel = (Button) findViewById(R.id.btnGalleryCancel);
+		btnGalleryCancel = (Button) findViewById(Utility.resId_btnGalleryCancel);
+		//galleryTitle = (TextView) findViewById(R.id.tvTitleText);
+		galleryTitle = (TextView) findViewById(Utility.resId_tvTitleText);
+		
+		if (titleText != null) {
+			galleryTitle.setText(titleText);
+		}
+		
+		if (okButtonText != null) {
+			btnGalleryOk.setText(okButtonText);
+		}
+		
+		if (cancelButtonText != null) {
+			btnGalleryCancel.setText(cancelButtonText);
+		}	
+		
+		btnGalleryCancel.setOnClickListener(mCancelClickListener);
+		btnGalleryOk.setOnClickListener(mOkClickListener);
+
+		new Thread() {
+
+			@Override
+			public void run() {
+				Looper.prepare();
+				handler.post(new Runnable() {
+
+					@Override
+					public void run() {
+						adapter.addAll(getGalleryPhotos());
+						checkImageStatus();
+					}
+				});
+				Looper.loop();
+			};
+
+		}.start();
+
+	}
+
+	private void checkImageStatus() {
+		if (adapter.isEmpty()) {
+			imgNoMedia.setVisibility(View.VISIBLE);
+		} else {
+			imgNoMedia.setVisibility(View.GONE);
 		}
 	}
+
+	View.OnClickListener mOkClickListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ArrayList<CustomGallery> selected = adapter.getSelected();
+
+			String[] allPath = new String[selected.size()];
+			for (int i = 0; i < allPath.length; i++) {
+				allPath[i] = selected.get(i).sdcardPath;
+			}
+			
+			//clear adapter
+			adapter.clear();
+			adapter.clearCache();
+			Intent data = new Intent().putExtra("all_path", allPath);
+			try{
+				setResult(RESULT_OK, data);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+			finish();
+
+		}
+	};
 	
+	View.OnClickListener mCancelClickListener = new View.OnClickListener() {
 
+		@Override
+		public void onClick(View v) {
+			//clear adapter
+			adapter.clear();
+			adapter.clearCache();
+			setResult(RESULT_CANCELED);
+			finish();
+		}
+	};
+	
+	AdapterView.OnItemClickListener mItemMulClickListener = new AdapterView.OnItemClickListener() {
 
+		@Override
+		public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+			adapter.changeSelection(v, position, limit);
 
-	public static String FormaetfileSize(long size){		
-		 if (size <= 0)
-		      return "0";
-		    final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
-		    int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+		}
+	};
 
-		    return String.format("%.2f", size / Math.pow(1024, digitGroups))
-		        + " " + units[digitGroups];
+	AdapterView.OnItemClickListener mItemSingleClickListener = new AdapterView.OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+			CustomGallery item = adapter.getItem(position);
+			Intent data = new Intent().putExtra("single_path", item.sdcardPath);
+			setResult(RESULT_OK, data);
+			finish();
+		}
+	};
+
+	private ArrayList<CustomGallery> getGalleryPhotos() {
+		ArrayList<CustomGallery> galleryList = new ArrayList<CustomGallery>();
+
+		try {
+			final String[] columns = { MediaStore.Images.Media.DATA,
+					MediaStore.Images.Media._ID, MediaStore.Images.Thumbnails.DATA };
+			final String orderBy = MediaStore.Images.Media._ID;
+
+			@SuppressWarnings("deprecation")
+			Cursor imagecursor = managedQuery(
+					MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
+					null, null, orderBy);
+			if (imagecursor != null && imagecursor.getCount() > 0) {
+
+				while (imagecursor.moveToNext()) {
+					CustomGallery item = new CustomGallery();
+
+					int dataColumnIndex = imagecursor
+							.getColumnIndex(MediaStore.Images.Media.DATA);
+					int thumbColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA);
+					item.sdcardPath = imagecursor.getString(dataColumnIndex);
+					String thumbPath = imagecursor.getString(thumbColumnIndex);
+					galleryList.add(item);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+        // show newest photo at beginning of the list
+		Collections.reverse(galleryList);
+        return galleryList;
 	}
 	
+	@Override
+	public void onBackPressed() {
+		adapter.clear();
+		adapter.clearCache();
+		setResult(RESULT_CANCELED);
+		super.onBackPressed();
+	}
+
 }
