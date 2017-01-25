@@ -68,6 +68,7 @@
 		<source-file src="res/layout/gallery_item.xml" target-dir="res/layout"/>
 		<source-file src="res/layout/titlebar.xml" target-dir="res/layout"/>
 		<source-file src="res/layout/multiselectorfile.xml" target-dir="res/layout"/>
+		<source-file src="res/layout/multiselectorfile_item.xml" target-dir="res/layout"/>
 		<source-file src="res/layout/activity_photo.xml" target-dir="res/layout"/>
 		<source-file src="res/values-mdpi/colors.xml" target-dir="res/values"/>
 		<source-file src="res/values-mdpi/dimen.xml" target-dir="res/values"/>
