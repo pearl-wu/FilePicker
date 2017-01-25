@@ -8,8 +8,10 @@ import java.util.List;
 import com.orleonsoft.android.simplefilechooser.Constants;
 
 import am.armsoft.data.Category;
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,7 +25,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 
-public class CustomfileActivity extends ListActivity{
+public class CustomfileActivity extends Activity{
 	
 	private ArrayList<String> extensions = new ArrayList<>();
 	Category currentCategory;
@@ -32,18 +34,13 @@ public class CustomfileActivity extends ListActivity{
 
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		
-		int main = getResources().getIdentifier("multiselectorfile", "layout",  getPackageName());
-		int lists = this.getResources().getIdentifier("list", "id", this.getPackageName());
-		int icong = this.getResources().getIdentifier("icon", "id", this.getPackageName());
-		int sline = this.getResources().getIdentifier("secondLine", "id", this.getPackageName());
-		int fline = this.getResources().getIdentifier("firstLine", "id", this.getPackageName());
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(main);
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setContentView(Utility.main);
 				
-		Bundle extras = getIntent().getExtras();	
+		/*Bundle extras = getIntent().getExtras();	
 		if (extras != null) {
 			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
 				extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);				
@@ -97,7 +94,7 @@ public class CustomfileActivity extends ListActivity{
 		        }  
 		        cursor.close();
 			}			
-		}
+		}*/
 	}
 	
 
