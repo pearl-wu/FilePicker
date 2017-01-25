@@ -6,8 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -168,16 +170,14 @@ public class filepicker extends CordovaPlugin {
        
        if (action.equals("show")) {
            if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
-        	   showToast(args.optJSONObject(2).toString(),"short");
-        	   Intent i = new Intent(cordova.getActivity(), PhotoActivity.class);
+        	   Intent i = new Intent(cordova.getActivity(), PhotoActivity.class); 
         	   i.putExtra("url", args.getString(0));
         	   i.putExtra("title", args.getString(1));
         	   i.putExtra("options", args.optJSONObject(2).toString());
         	   cordova.getActivity().startActivity(i);
-        	   
-        	  // callbackContext.success(""); 
            } else {
-        	   cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
+        	   //cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
+        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
            }
            return true;
        }       
