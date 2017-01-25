@@ -24,8 +24,7 @@
             </activity>
 	    <activity android:name="com.bais.filepicker.CustomfileActivity" >
 		<intent-filter>
-		<action android:name="luminous.ACTION_PICK" />
-		<action android:name="luminous.ACTION_MULTIPLE_PICK" />
+		<action android:name="android.intent.action.SEND"/>
 		<category android:name="android.intent.category.DEFAULT" />
 		</intent-filter>
             </activity>
