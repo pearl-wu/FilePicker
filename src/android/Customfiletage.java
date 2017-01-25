@@ -28,8 +28,13 @@ public static int resId_galleryLayout = -1;
 	public static int ODT = -1;
 	public static int ODS = -1;
 	public static int ODP = -1;
-
-	public static int
+	public static int main = -1;
+	public static int main_item = -1;
+	public static int lists = -1;
+	public static int icong = -1;
+	public static int sline = -1;
+	public static int fline = -1;
+	
 		
 	public static void loadResourceIds(Context context) {
 	    String packageName = context.getPackageName();
@@ -57,10 +62,13 @@ public static int resId_galleryLayout = -1;
 	    ODT = resources.getIdentifier("odt", "drawable", packageName);
 	    ODS = resources.getIdentifier("ods", "drawable", packageName);
 	    ODP = resources.getIdentifier("odp", "drawable", packageName);
-		//resId_btnGalleryPickMul = resources.getIdentifier("btnGalleryPickMul", "layout", packageName);
-		//resId_btnGalleryPickMul = resources.getIdentifier("btnGalleryPickMul", "drawable", packageName);
-		//resId_btnGalleryPickMul = resources.getIdentifier("btnGalleryPickMul", "drawable", packageName);
-		//resId_btnGalleryPickMul = resources.getIdentifier("btnGalleryPickMul", "drawable", packageName);
+	    
+	    main = resources.getIdentifier("multiselectorfile", "layout", packageName);
+	    main_item = resources.getIdentifier("multiselectorfile_item", "layout", packageName);
+	    lists = resources.getIdentifier("list", "id", packageName);
+	    icong = resources.getIdentifier("icon", "id", packageName);
+	    sline = resources.getIdentifier("secondLine", "id", packageName);
+	    fline = resources.getIdentifier("firstLine", "id", packageName);
 	}
 	
 }
