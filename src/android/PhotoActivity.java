@@ -7,13 +7,13 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.net.Uri;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -30,6 +30,8 @@ import java.net.URL;
 public class PhotoActivity extends Activity {
 	private PhotoViewAttacher mAttacher;
 	private ImageView photo;
+	private int warning;
+	private int place;
 	private String imageUrl;
 	private ImageButton closeBtn;
 	private ImageButton shareBtn;
@@ -66,6 +68,7 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				HttpDownloader httpDownloader = new HttpDownloader();
+				
 				int result = httpDownloader.downFile(imageUrl, "Download/", actTitle);
 				if(result==-1){
 					Toast.makeText(getApplicationContext(), "儲存錯誤", Toast.LENGTH_LONG).show();
@@ -77,7 +80,7 @@ public class PhotoActivity extends Activity {
 			}
 		});
 
-		try {
+		try {		
 			loadImage();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -95,6 +98,8 @@ public class PhotoActivity extends Activity {
 		shareBtn = (ImageButton) findViewById( getApplication().getResources().getIdentifier("shareBtn", "id", getApplication().getPackageName()) );
 		// Photo Container
 		photo = (ImageView) findViewById( getApplication().getResources().getIdentifier("photoView", "id", getApplication().getPackageName()) );
+		warning = this.getResources().getIdentifier("warning", "drawable",  getApplication().getPackageName());
+		place = this.getResources().getIdentifier("no_media", "drawable",  getApplication().getPackageName());
 		mAttacher = new PhotoViewAttacher(photo);
 		// Title TextView
 		//titleTxt = (TextView) findViewById( getApplication().getResources().getIdentifier("titleTxt", "id", getApplication().getPackageName()) );
@@ -107,9 +112,17 @@ public class PhotoActivity extends Activity {
 		mAttacher.update();
 	}
 
-	private void loadImage() throws MalformedURLException {
+	private void loadImage() throws MalformedURLException{
+		//Toast.makeText(getApplicationContext(), imageUrl, Toast.LENGTH_SHORT).show();	
 		if( imageUrl.startsWith("http") ) {
-		Picasso.with(this)
+			Glide.with(getApplicationContext())
+	        .load(imageUrl)
+	        .error(warning)
+	        .fitCenter()
+            .skipMemoryCache( true )
+	        .into(photo);
+			hideLoadingAndUpdate();
+		/*Picasso.with(this)
 				.load(imageUrl)
 				.resize(1024, 0)
 				.onlyScaleDown()
@@ -124,7 +137,7 @@ public class PhotoActivity extends Activity {
 						Toast.makeText(getApplicationContext(), "Error loading image.", Toast.LENGTH_LONG).show();
 						finish();
 					}
-				});
+				});*/
 	} else if ( imageUrl.startsWith("data:image")){
             String base64String = imageUrl.substring(imageUrl.indexOf(",")+1);
             byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
@@ -164,7 +177,7 @@ public class PhotoActivity extends Activity {
 		
 		public int downFile(String urlStr, String path, String fileName) {
 			InputStream inputStream = null;
-			//Log.i("................", "fileName");
+			//Log.i("................", urlStr);
 			try {
 				FileUtils fileUtils = new FileUtils();
 				if (fileUtils.isFileExist(path + fileName)) {
