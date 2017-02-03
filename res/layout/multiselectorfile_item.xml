@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:padding="6dip" 
-    android:background="@color/bg_light_blue">
+    android:padding="10dip"
+    android:background="@color/bg_light_blue" >
 
     <ImageView
         android:id="@+id/icon"
@@ -15,20 +16,6 @@
         android:layout_marginRight="3dip"
         android:contentDescription="TODO"
         android:src="@drawable/blank" />
-    
-    <TextView
-        android:id="@+id/firstLine"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/secondLine"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_toRightOf="@id/icon"
-        android:gravity="center_vertical"
-        android:text="Example application"
-        android:textSize="16sp" 
-        android:textColor="#000000" />
 
     <TextView
         android:id="@+id/secondLine"
@@ -42,5 +29,19 @@
         android:text="Description"
         android:textSize="12sp"
         android:textColor="#939598" />
+
+    <TextView
+        android:id="@+id/firstLine"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/secondLine"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toRightOf="@id/icon"
+        android:gravity="center_vertical"
+        android:text="Example application"
+        android:textSize="16sp" 
+        android:textColor="#000000" />
 
 </RelativeLayout>
