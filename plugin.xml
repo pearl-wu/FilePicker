@@ -52,6 +52,28 @@
 		<source-file src="res/drawable/no_media.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/tick_mark_bg.xml" target-dir="res/drawable"/>
 		<source-file src="res/drawable/trasnparent_bg.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/blank.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/doc.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/docx.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/ppt.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/pptx.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/xls.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/xlsx.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/pdf.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/odp.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/ods.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/odt.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/txt.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/zip.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/rar.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/apk.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/ai.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/avi.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/gif.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/jpg.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/mp3.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/mp4.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/png.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable-hdpi/button_default.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/button_hover.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/check_icon.png" target-dir="res/drawable-hdpi"/>
