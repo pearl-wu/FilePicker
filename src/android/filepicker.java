@@ -6,10 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -20,7 +18,6 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.orleonsoft.android.simplefilechooser.Constants;
 
 import android.Manifest;
 import android.app.Activity;
@@ -31,8 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.Toast;
 
 public class filepicker extends CordovaPlugin {
@@ -292,7 +287,6 @@ public static byte[] readInputStream(InputStream inputStream) throws IOException
     return bos.toByteArray();  
 }
    
-@SuppressWarnings("unused")
 private void openFile(String url) throws IOException {
        // Create URI
        Uri uri = Uri.parse(url);
