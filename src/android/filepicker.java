@@ -193,7 +193,7 @@ public void chooseFile(CallbackContext callbackContext, ArrayList<String> ext) {
    if(ext.size()>0){
      intent.putStringArrayListExtra(Constants.KEY_FILTER_FILES_EXTENSIONS, ext);
    }
-   cordova.startActivityForResult(this, intent, 1);
+   cordova.startActivityForResult(this, intent, 100);
    PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
    pluginResult.setKeepCallback(true);
    callbackContext.sendPluginResult(pluginResult);
@@ -213,10 +213,12 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 				    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 				    NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-				    Notification.Builder mBuilder =
+				    Notification mBuilder =
 				         new Notification.Builder(cordova.getActivity())
 				         //.setContentTitle(cordova.getActivity().getString(R.string.app_name))
-				         .setContentText("File: " + fileName + " - 0%");
+				         .setContentText("File: " + fileName + " - 0%")
+				         .setContentIntent(pend)
+				    	 .build();
 				    int mNotificationId = new Random().nextInt(10000);
 				    URL url = new URL(fileUrl);
 				    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
@@ -233,10 +235,12 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				     totalReaded += readed;
 				     int newProgress = (int) (totalReaded*100/fileSize);
 				     if (newProgress != progress & newProgress > step) {
-				      mBuilder.setProgress(100, newProgress, false);
-				      mBuilder.setContentText("File: " + fileName + " - " + step + "%");
-				      mBuilder.setContentIntent(pend);
-				      mNotifyManager.notify(mNotificationId, mBuilder.build());
+				    	mBuilder.tickerText = "下载中...";
+				    	mNotifyManager.notify(0, mBuilder); 
+				     // mBuilder.setProgress(100, newProgress, false);
+				     // mBuilder.setContentText("File: " + fileName + " - " + step + "%");
+				     // mBuilder.setContentIntent(pend);
+				     // mNotifyManager.notify(mNotificationId, mBuilder.build());
 				      step = step + 1;
 				     }
 			    }
@@ -244,33 +248,33 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 			    fos.close();
 			    is.close();
 			    ucon.disconnect();
-			    mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
-			             mNotifyManager.notify(mNotificationId, mBuilder.build());
-			             try {
-			                    Thread.sleep(1000);
-			                } catch (InterruptedException e) {
-			                 Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
-			                }
-			             mNotifyManager.cancel(mNotificationId);
-			    showToast("Download finished.","short");
+			   // mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
+			   // mNotifyManager.notify(mNotificationId, mBuilder.build());
+			     try {
+			         Thread.sleep(1000);
+			     } catch (InterruptedException e) {
+			          //Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
+			     }
+			    mNotifyManager.cancel(mNotificationId);
+			    showToast("下載檔案...","short");
 			   } else if (overwrite == false) {
 			    showToast("File is already downloaded.","short");
 			   }
 			   if(!file.exists()) {
 			    showToast("Download went wrong, please try again or contact the developer.","long");
-			    Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
+			    //Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
 			   }
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 			   return true;
 		  } catch (FileNotFoundException e) {
-			   showToast("File does not exists or cannot connect to webserver, please try again or contact the developer.","long");
-			   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+			   showToast("檔案不存在","long");
+			   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 			   e.printStackTrace();
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 			   return false;
 		  } catch (IOException e) {
-			   showToast("Error downloading file, please try again or contact the developer.","long");
-			   Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
+			   showToast("檔案下載錯誤","long");
+			   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 			   e.printStackTrace();
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 			   return false;
@@ -347,26 +351,26 @@ private void openFile(String url) throws IOException {
    } 
 
 public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	JSONObject res = new JSONObject();
    try {
-        if (resultCode == Activity.RESULT_CANCELED) {
-            JSONObject res = new JSONObject();
+        if (resultCode == Activity.RESULT_CANCELED) { 
             res.put("cancelled", true);
             //showToast("Activity.RESULT_CANCELED","");
             this.callbackContext.success(res);
         } else if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
             String single_path = data.getStringExtra("single_path");
-            JSONObject res = new JSONObject();
+            long size = data.getLongExtra("sz", 0);
             res.put("cancelled", false);
             res.put("path", single_path);
-            //showToast("Activity.RESULT_OK","");
+            res.put("size", size);
             this.callbackContext.success(res);
+            //showToast(size+"","");
         } else if (requestCode == 200 && resultCode == Activity.RESULT_OK) {
             String[] fileNames = data.getStringArrayExtra("all_path");
             JSONArray p = new JSONArray();
             for(int i = 0;i < fileNames.length; i++) {
                 p.put(fileNames[i]);
             }
-            JSONObject res = new JSONObject();
             res.put("cancelled", false);
             res.put("paths", p);
             //showToast("Activity.RESULT_OK","");
