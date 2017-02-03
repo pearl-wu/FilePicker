@@ -1,25 +1,16 @@
 package com.bais.filepicker;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.cordova.CordovaActivity;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.orleonsoft.android.simplefilechooser.Constants;
-import am.armsoft.data.Category;
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.icu.util.ULocale.Category;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Looper;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Files.FileColumns;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,7 +19,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 
 public class CustomfileActivity extends Activity{
@@ -38,11 +28,9 @@ public class CustomfileActivity extends Activity{
 	String record = "";
 	ListView listView;
 	private String[] url;
-	private String[] tape;
 	private long[] sz;
 	GridView gridGallery;
 	GalleryAdapter adapter;
-	private ImageLoader imageLoader;
 
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
