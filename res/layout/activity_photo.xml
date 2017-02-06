@@ -15,7 +15,8 @@
         android:id="@+id/photoView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:scaleType="centerInside"
+        android:scaleType="fitCenter"
+        android:layout_centerInParent="true"
         android:visibility="invisible" />
 
     <FrameLayout
