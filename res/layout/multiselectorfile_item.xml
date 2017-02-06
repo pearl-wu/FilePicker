@@ -16,25 +16,43 @@
         android:layout_marginRight="3dip"
         android:contentDescription="TODO"
         android:src="@drawable/blank" />
+    
+    <RelativeLayout
+        android:id="@+id/Line"
+        android:layout_width="match_parent"
+        android:layout_height="15dip"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@id/icon"
+        android:orientation="horizontal" >
 
     <TextView
+         android:id="@+id/timeLine"
+         android:layout_width="wrap_content"
+         android:layout_height="15dip"
+         android:layout_alignParentBottom="true"
+         android:layout_alignParentLeft="true"
+         android:text="time"
+         android:textColor="#939598"
+         android:textSize="12sp" />  
+    <TextView
         android:id="@+id/secondLine"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="15dip"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_toRightOf="@id/icon"
         android:ellipsize="marquee"
         android:singleLine="true"
         android:text="Description"
         android:textSize="12sp"
-        android:textColor="#939598" />
+        android:textColor="#939598" />   
+           
+    </RelativeLayout> 
 
     <TextView
         android:id="@+id/firstLine"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/secondLine"
+        android:layout_above="@id/Line"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
