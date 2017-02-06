@@ -87,7 +87,9 @@ public class CustomfileActivity extends Activity{
 		        		
 		               HashMap<String, Object> map = new HashMap<String, Object>();
 		               //Toast.makeText(this, String.valueOf(filename.substring(filename.lastIndexOf(".")+1).toLowerCase()), Toast.LENGTH_SHORT).show();
-		               int flags = this.getResources().getIdentifier(String.valueOf(filename.substring(filename.lastIndexOf(".")+1).toLowerCase()), "drawable", this.getPackageName());
+		               String at = String.valueOf(filename.substring(filename.lastIndexOf(".")+1).toLowerCase());
+		               if(at=="7z") at = "z";
+		               int flags = this.getResources().getIdentifier(at, "drawable", this.getPackageName());
 		               map.put("filetapy", flags);
 		               map.put("filename", filename);
 		               map.put("filesize", FormaetfileSize(sx)); 
