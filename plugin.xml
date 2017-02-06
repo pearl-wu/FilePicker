@@ -67,14 +67,16 @@
 		<source-file src="res/drawable/txt.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/zip.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/rar.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/7z.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/apk.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/iso.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/ai.png" target-dir="res/drawable"/>
-		<source-file src="res/drawable/avi.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/gif.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/jpg.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/png.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/avi.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/mp3.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/mp4.png" target-dir="res/drawable"/>
-		<source-file src="res/drawable/png.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable-hdpi/button_default.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/button_hover.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/check_icon.png" target-dir="res/drawable-hdpi"/>
