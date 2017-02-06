@@ -10,8 +10,11 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.net.Uri;
+
+import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import org.json.JSONException;
@@ -30,11 +33,13 @@ import java.net.URL;
 public class PhotoActivity extends Activity {
 	private PhotoViewAttacher mAttacher;
 	private ImageView photo;
+	private ImageView error;
 	private int warning;
 	private int place;
 	private String imageUrl;
 	private ImageButton closeBtn;
 	private ImageButton shareBtn;
+	private ProgressBar progress;
 	private JSONObject options;
 	private int shareBtnVisibility;
 	@Override
@@ -114,14 +119,22 @@ public class PhotoActivity extends Activity {
 
 	private void loadImage() throws MalformedURLException{
 		//Toast.makeText(getApplicationContext(), imageUrl, Toast.LENGTH_SHORT).show();	
+		progress = (ProgressBar) findViewById( getApplication().getResources().getIdentifier("progressBar1", "id", getApplication().getPackageName()) );
+		error = (ImageView) findViewById( getApplication().getResources().getIdentifier("warning", "id", getApplication().getPackageName()) );
 		if( imageUrl.startsWith("http") ) {
-			Glide.with(getApplicationContext())
+			((DrawableTypeRequest<String>) Glide.with(getApplicationContext())
 	        .load(imageUrl)
 	        .error(warning)
 	        .fitCenter()
-            .skipMemoryCache( true )
+	        .crossFade())
+	        .asBitmap()
+	        .error(error.getBaseline())
 	        .into(photo);
+
 			hideLoadingAndUpdate();
+			progress.setVisibility(View.INVISIBLE);
+			
+			
 		/*Picasso.with(this)
 				.load(imageUrl)
 				.resize(1024, 0)
