@@ -207,13 +207,11 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				    Intent intent = new Intent ();
 				    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 				    PendingIntent pend = PendingIntent.getActivity(cordova.getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				    int notification_icon = cordova.getActivity().getResources().getIdentifier("icon", "drawable",  cordova.getActivity().getApplication().getPackageName());
 				    NotificationManager mNotifyManager = (NotificationManager) cordova.getActivity().getSystemService(Activity.NOTIFICATION_SERVICE);
-				    Notification mBuilder =
-				         new Notification.Builder(cordova.getActivity())
-				         //.setContentTitle(cordova.getActivity().getString(R.string.app_name))
-				         .setContentText("File: " + fileName + " - 0%")
-				         .setContentIntent(pend)
-				    	 .build();
+				    Notification.Builder mBuilder = new Notification.Builder(cordova.getActivity())
+				    								.setSmallIcon(notification_icon);
+				    
 				    int mNotificationId = new Random().nextInt(10000);
 				    URL url = new URL(fileUrl);
 				    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
@@ -223,19 +221,19 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				    byte[] buffer = new byte[1024];
 				    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
 				    FileOutputStream fos = new FileOutputStream(file);
-				    showToast("Download started.","short");
+				    showToast("下載中...","short");
 				    int step = 0;
 				    while ((readed = is.read(buffer)) > 0) {
 				     fos.write(buffer, 0, readed);
 				     totalReaded += readed;
 				     int newProgress = (int) (totalReaded*100/fileSize);
+
 				     if (newProgress != progress & newProgress > step) {
-				    	mBuilder.tickerText = "下载中...";
-				    	mNotifyManager.notify(0, mBuilder); 
-				     // mBuilder.setProgress(100, newProgress, false);
-				     // mBuilder.setContentText("File: " + fileName + " - " + step + "%");
-				     // mBuilder.setContentIntent(pend);
-				     // mNotifyManager.notify(mNotificationId, mBuilder.build());
+				    	//showToast(step+"%","short");
+				    	mBuilder.setProgress(100, step, true);
+				    	mBuilder.setContentTitle(fileName);
+				    	mBuilder.setContentText("File: " + fileName + " - " + step + "%");
+				        mNotifyManager.notify(mNotificationId, mBuilder.build());
 				      step = step + 1;
 				     }
 			    }
@@ -251,24 +249,26 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 			          //Log.d("PhoneGapLog", "Downloader Plugin: Thread sleep error: " + e);
 			     }
 			    mNotifyManager.cancel(mNotificationId);
-			    showToast("下載檔案...","short");
+			    //showToast("檔案下載完成","short");
 			   } else if (overwrite == false) {
 			    showToast("File is already downloaded.","short");
+			    return false;
 			   }
 			   if(!file.exists()) {
 			    showToast("Download went wrong, please try again or contact the developer.","long");
 			    //Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
+			    return false;
 			   }
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 			   return true;
 		  } catch (FileNotFoundException e) {
-			   showToast("檔案不存在","long");
+			   showToast("檔案不存在","short");
 			   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 			   e.printStackTrace();
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
 			   return false;
 		  } catch (IOException e) {
-			   showToast("檔案下載錯誤","long");
+			   showToast("檔案下載錯誤","short");
 			   //Log.e("PhoneGapLog", "Downloader Plugin: Error: " + PluginResult.Status.ERROR);
 			   e.printStackTrace();
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
@@ -288,10 +288,16 @@ public static byte[] readInputStream(InputStream inputStream) throws IOException
 }
    
 private void openFile(String url) throws IOException {
+
+		File isfile = new File(url.substring(8));
+	    if(!isfile.exists()){
+	       showToast("檔案不存在","long");
+	 	   return ;
+	    } 
+	
        // Create URI
        Uri uri = Uri.parse(url);
        Intent intent = null;
-
        if (url.contains(".doc") || url.contains(".docx")) {
            // Word document
            intent = new Intent(Intent.ACTION_VIEW);

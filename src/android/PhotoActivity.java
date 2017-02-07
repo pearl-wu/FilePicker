@@ -1,39 +1,42 @@
 package com.bais.filepicker;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.StrictMode;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.net.Uri;
-
-import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import cz.msebera.android.httpclient.Header;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class PhotoActivity extends Activity {
+	
 	private PhotoViewAttacher mAttacher;
 	private ImageView photo;
-	private ImageView error;
 	private int warning;
 	private int place;
 	private String imageUrl;
@@ -45,6 +48,10 @@ public class PhotoActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		
 		setContentView(getApplication().getResources().getIdentifier("activity_photo", "layout", getApplication().getPackageName()));
 		// Load the Views
 		findViews();
@@ -60,6 +67,7 @@ public class PhotoActivity extends Activity {
 		// Change the Activity Title
 		final String actTitle = this.getIntent().getStringExtra("title");
 		imageUrl = this.getIntent().getStringExtra("url");
+		
 
 		// Set Button Listeners
 		closeBtn.setOnClickListener(new View.OnClickListener() {
@@ -73,22 +81,19 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				HttpDownloader httpDownloader = new HttpDownloader();
-				
-				int result = httpDownloader.downFile(imageUrl, "Download/", actTitle);
-				if(result==-1){
-					Toast.makeText(getApplicationContext(), "儲存錯誤", Toast.LENGTH_LONG).show();
-				}else if(result==0){
-					Toast.makeText(getApplicationContext(), "儲存成功", Toast.LENGTH_LONG).show();
-				}else if(result==1){
-					Toast.makeText(getApplicationContext(), "已儲存", Toast.LENGTH_LONG).show();
+				try {
+					httpDownloader.downFile(imageUrl, "Download/", actTitle);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+				
 			}
 		});
 
 		try {		
 			loadImage();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -108,6 +113,7 @@ public class PhotoActivity extends Activity {
 		mAttacher = new PhotoViewAttacher(photo);
 		// Title TextView
 		//titleTxt = (TextView) findViewById( getApplication().getResources().getIdentifier("titleTxt", "id", getApplication().getPackageName()) );
+		progress = (ProgressBar) findViewById( getApplication().getResources().getIdentifier("progressBar", "id", getApplication().getPackageName()));
 	}
 
 
@@ -117,24 +123,22 @@ public class PhotoActivity extends Activity {
 		mAttacher.update();
 	}
 
-	private void loadImage() throws MalformedURLException{
+	@SuppressLint("InlinedApi") private void loadImage() throws MalformedURLException{
 		//Toast.makeText(getApplicationContext(), imageUrl, Toast.LENGTH_SHORT).show();	
-		progress = (ProgressBar) findViewById( getApplication().getResources().getIdentifier("progressBar1", "id", getApplication().getPackageName()) );
-		error = (ImageView) findViewById( getApplication().getResources().getIdentifier("warning", "id", getApplication().getPackageName()) );
+		
 		if( imageUrl.startsWith("http") ) {
-			((DrawableTypeRequest<String>) Glide.with(getApplicationContext())
+			Glide.with(getApplicationContext())
 	        .load(imageUrl)
+	        //.fitCenter()
+	        .crossFade(1000)
+	        //.override(80,80)
+	        .placeholder(place)
 	        .error(warning)
-	        .fitCenter()
-	        .crossFade())
-	        .asBitmap()
-	        .error(error.getBaseline())
+	        .thumbnail(0.1f)//10%的原大小
 	        .into(photo);
-
 			hideLoadingAndUpdate();
 			progress.setVisibility(View.INVISIBLE);
-			
-			
+	
 		/*Picasso.with(this)
 				.load(imageUrl)
 				.resize(1024, 0)
@@ -151,133 +155,149 @@ public class PhotoActivity extends Activity {
 						finish();
 					}
 				});*/
-	} else if ( imageUrl.startsWith("data:image")){
-            String base64String = imageUrl.substring(imageUrl.indexOf(",")+1);
-            byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            photo.setImageBitmap(decodedByte);
-            hideLoadingAndUpdate();
-        } else {
-            photo.setImageURI(Uri.parse(imageUrl));
-            hideLoadingAndUpdate();
-        }
+		} else if ( imageUrl.startsWith("data:image")){
+	            String base64String = imageUrl.substring(imageUrl.indexOf(",")+1);
+	            byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
+	            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+	            photo.setImageBitmap(decodedByte);
+	            hideLoadingAndUpdate();
+	    } else {
+	            photo.setImageURI(Uri.parse(imageUrl));
+	            hideLoadingAndUpdate();
+	    }
 	}
+	
+	
 	
 	public class HttpDownloader {
 		private URL url = null;
-		public String download(String urlStr) {
-			StringBuffer sb = new StringBuffer();
-			String line = null;
-			BufferedReader buffer = null;
-			try {
-				url = new URL(urlStr);
-				HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-				buffer = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-				while ((line = buffer.readLine()) != null) {
-					sb.append(line);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					buffer.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return sb.toString();
-		}
-		
-		public int downFile(String urlStr, String path, String fileName) {
-			InputStream inputStream = null;
-			//Log.i("................", urlStr);
-			try {
-				FileUtils fileUtils = new FileUtils();
-				if (fileUtils.isFileExist(path + fileName)) {
-					return 1;
-				} else {
-					inputStream = getInputStreamFromUrl(urlStr);
-					File resultFile = fileUtils.write2SDFromInput(path,fileName, inputStream);
-					if (resultFile == null) {
-						return -1;
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return -1;
-			} finally {
-				try {
-					inputStream.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return 0;
-		}
-		
-		public InputStream getInputStreamFromUrl(String urlStr) throws MalformedURLException, IOException {
-			url = new URL(urlStr);
-			HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-			InputStream inputStream = urlConn.getInputStream();
-			return inputStream;
-		}
-		
-		public class FileUtils {
-			private String SDPATH;
-			public String getSDPATH() {
-				return SDPATH;
-			}
-			public FileUtils() {
-				//得到當前外部存放裝置的目錄	// /SDCARD
-				SDPATH = Environment.getExternalStorageDirectory() + "/";
-			}
-			/*** 在SD卡上創建檔	* @throws IOException*/
-			public File creatSDFile(String fileName) throws IOException {
-				File file = new File(SDPATH + fileName);
-				file.createNewFile();
-				return file;
-			}
 
-			/*** 在SD卡上創建目錄* @param dirName*/
-			public File creatSDDir(String dirName) {
-				File dir = new File(SDPATH + dirName);
-				dir.mkdirs();
-				return dir;
-			}
+		
+	     public void downFile(final String urlStr, final String path, final String fileName) throws Exception {
+	        
+	         try {
+	        	 
+	             final FileUtils fileUtils = new FileUtils();
+	       
+	             if (fileUtils.isFileExist(path + fileName)) {
+	            	 
+	            	 Toastshow(1);
+	             } else {
+	            	 
+	            	 AsyncHttpClient client = new AsyncHttpClient();
+	            	 RequestParams params = new RequestParams();
+	            	 client.get(urlStr, params, new AsyncHttpResponseHandler(){
 
-			/*** 判斷SD卡上的資料夾是否存在*/
-			public boolean isFileExist(String fileName){
-				File file = new File(SDPATH + fileName);
-				return file.exists();
-			}
+						@Override
+						public void onFailure(int arg0, Header[] arg1,
+								byte[] arg2, Throwable arg3) {
+							// TODO Auto-generated method stub
+							Toastshow(-1);
+						}
 
-			/*** 將一個InputStream裡面的資料寫入到SD卡中*/
-			public File write2SDFromInput(String path,String fileName,InputStream input){
-				File file = null;
-				OutputStream output = null;
-				try{
-					creatSDDir(path);
-					file = creatSDFile(path + fileName);
-					output = new FileOutputStream(file);
-					byte buffer [] = new byte[4 * 1024];
-					while((input.read(buffer)) != -1){
-						output.write(buffer);
-					}
-					output.flush();
-				}
-				catch(Exception e){
-					e.printStackTrace();
-				}
-				finally{
-					try{
-						output.close();
-					}
-					catch(Exception e){
-						e.printStackTrace();
-					}
-				}
-				return file;
-			}
-		}		
-	}	
+						@Override
+						public void onSuccess(int arg0, Header[] arg1,
+								byte[] arg2) {
+							// TODO Auto-generated method stub
+							InputStream inputStream = null;
+							progress.setProgress(0); 
+							Log.i("binaryData:", "下載..........：" + arg2.length);  		
+							try {
+								inputStream = getInputStreamFromUrl(urlStr);
+								File resultFile = fileUtils.write2SDFromInput(path,fileName, inputStream);
+
+				                 if (resultFile == null) {
+				                	 Toastshow(-1);
+				                     return ;
+				                 }
+				                 
+				                 Toastshow(0);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}finally {
+					             try {
+					                 inputStream.close();
+					             } catch (Exception e) {
+					                 e.printStackTrace();
+					             }
+					         }
+						}
+						
+									 @Override
+									 public void onStart() {
+						                 super.onStart();
+						                 System.out.println("--------onStart------");
+						                 //Toast.makeText(getApplicationContext(), "--------onStart------", Toast.LENGTH_SHORT).show();
+						             }
+						 
+						             @Override
+						             public void onFinish() {
+						                 super.onFinish();
+						                 System.out.println("--------onFinish------");
+						                 //Toast.makeText(getApplicationContext(), "--------onFinish------", Toast.LENGTH_SHORT).show();
+						             }
+						 
+						             @Override
+						             public void onRetry(int retryNo) {
+						                 super.onRetry(retryNo);
+						                 System.out.println("--------onRetry------");
+						                 //Toast.makeText(getApplicationContext(), "--------onRetry------", Toast.LENGTH_SHORT).show();
+						             }
+						 
+						             @Override
+						             public void onCancel() {
+						                 super.onCancel();
+						                 System.out.println("--------onCancel------");
+						                 //Toast.makeText(getApplicationContext(), "--------onCancel------", Toast.LENGTH_SHORT).show();
+						             }
+						 
+						             public void onProgress(int bytesWritten, int totalSize) {
+						                 super.onProgress(bytesWritten, totalSize);
+						                 System.out.println("--------onProgress------");
+				            	            super.onProgress(bytesWritten, totalSize);  
+				            	            int count = (int) ((bytesWritten * 1.0 / totalSize) * 100);  
+				            	            // 進度顯示
+				            	            progress.setProgress(count);  
+				            	            Log.i("下載 Progress>>>>>", bytesWritten + " / " + totalSize); 
+						             }
+	            		 
+	            	 });
+	             }
+	         } catch (Exception e) {
+	             e.printStackTrace();
+	             Toastshow(-1);
+	         } 
+	     }
+	     
+	     public InputStream getInputStreamFromUrl(String urlStr) throws MalformedURLException, IOException{
+		    // 建立一個URL物件 
+		   	url = new URL(urlStr);
+		   	// 建立一個Http連接
+		   	HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+		   	//得到輸入流
+		   	InputStream inputStream = urlConn.getInputStream();
+			   	/*String line = null;
+			   	StringBuffer stringBuffer = new StringBuffer();
+			   	BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			   	while((line = bufferedReader.readLine()) != null){
+			   	stringBuffer.append(line);
+			   	}*/
+		   		//Toast.makeText(getApplicationContext(), inputStream.toString(), Toast.LENGTH_LONG).show();
+		   	return inputStream;
+	     }
+	     
+	     
+	     public void Toastshow(int mt){
+	    	 String st = null;
+	    	 if(mt==-1){
+	    		 st = "儲存錯誤";
+			 }else if(mt==0){
+				 st = "儲存成功";
+			 }else if(mt==1){
+				 st = "已儲存";
+			 }
+	    	 Toast.makeText(getApplicationContext(), st, Toast.LENGTH_SHORT).show();
+	     }
+	}     
 }
