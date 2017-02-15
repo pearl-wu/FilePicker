@@ -2,6 +2,7 @@ package com.bais.filepicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -199,6 +200,7 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 	throws InterruptedException, JSONException {
 		  try {
 			   File dir = new File(dirName);
+			   		// showToast(fileUrl,"short");
 			   if (!dir.exists()) {
 				   dir.mkdirs();
 			   }
@@ -213,33 +215,46 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				    								.setSmallIcon(notification_icon);
 				    
 				    int mNotificationId = new Random().nextInt(10000);
+				    fileUrl = StringProcessCode.ecodeUrlWithUTf8(fileUrl);
 				    URL url = new URL(fileUrl);
 				    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
-				    ucon.setRequestMethod("GET");
+				    ucon.setRequestMethod("POST");
+				    ucon.setConnectTimeout(6*1000);
+				    ucon.setReadTimeout(6*1000);
+				    ucon.setDoOutput(true);
+				    ucon.setDoInput(true);
 				    ucon.connect();
+				    
+				    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				    InputStream is = ucon.getInputStream();
-				    byte[] buffer = new byte[1024];
-				    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();
-				    FileOutputStream fos = new FileOutputStream(file);
-				    showToast("下載中...","short");
-				    int step = 0;
-				    while ((readed = is.read(buffer)) > 0) {
-				     fos.write(buffer, 0, readed);
-				     totalReaded += readed;
-				     int newProgress = (int) (totalReaded*100/fileSize);
 
-				     if (newProgress != progress & newProgress > step) {
-				    	//showToast(step+"%","short");
-				    	mBuilder.setProgress(100, step, true);
-				    	mBuilder.setContentTitle(fileName);
-				    	mBuilder.setContentText("File: " + fileName + " - " + step + "%");
-				        mNotifyManager.notify(mNotificationId, mBuilder.build());
-				      step = step + 1;
-				     }
-			    }
+				    byte[] buffer = new byte[8 * 1024];
+				    int readed = 0, progress = 0, totalReaded = 0, fileSize = ucon.getContentLength();	   
+				    showToast("下載中...","short");
+				    
+				    int step = 0;
+					    while ((readed = is.read(buffer)) != -1) {
+					     outputStream.write(buffer, 0, readed);
+					     //showToast(readed+"%","short");
+					     totalReaded += readed;
+					     int newProgress = (int) (totalReaded*100/fileSize);
+						     if (newProgress != progress & newProgress > step) {
+						    	mBuilder.setProgress(100, step, true);
+						    	mBuilder.setContentTitle(fileName);
+						    	mBuilder.setContentText("File: " + fileName + " - " + step + "%");
+						        mNotifyManager.notify(mNotificationId, mBuilder.build());
+						      step = step + 1;
+						     }
+					    }
+				byte[] bytes = outputStream.toByteArray();
+				FileOutputStream fos = new FileOutputStream(file);    
+				fos.write(bytes);  
+				 
 			    fos.flush();
 			    fos.close();
+
 			    is.close();
+			    outputStream.close();
 			    ucon.disconnect();
 			   // mBuilder.setContentText("Download of \"" + fileName + "\" complete").setProgress(0,0,false);
 			   // mNotifyManager.notify(mNotificationId, mBuilder.build());

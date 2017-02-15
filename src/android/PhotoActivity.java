@@ -15,16 +15,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.net.Uri;
-import com.bumptech.glide.Glide;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.Picasso;
 
 import cz.msebera.android.httpclient.Header;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +35,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class PhotoActivity extends Activity {
 	
@@ -39,12 +43,15 @@ public class PhotoActivity extends Activity {
 	private ImageView photo;
 	private int warning;
 	private int place;
+	private int wid;
+	private int heg;
 	private String imageUrl;
 	private ImageButton closeBtn;
 	private ImageButton shareBtn;
 	private ProgressBar progress;
 	private JSONObject options;
 	private int shareBtnVisibility;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,6 +75,31 @@ public class PhotoActivity extends Activity {
 		final String actTitle = this.getIntent().getStringExtra("title");
 		imageUrl = this.getIntent().getStringExtra("url");
 		
+		try {
+			URL url = new URL(imageUrl);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setDoInput(true);
+	        connection.connect();
+	        InputStream input = connection.getInputStream();
+	        Bitmap bitmap = BitmapFactory.decodeStream(input);
+	        //Toast.makeText(getApplicationContext(), bitmap.getWidth()+"*"+bitmap.getHeight(), Toast.LENGTH_SHORT).show();	
+	        wid = bitmap.getWidth();
+	        heg = bitmap.getHeight();
+	        
+	       /* if(bitmap.getWidth()<bitmap.getHeight()){
+	        	image_parames = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+	        }else{
+	        	image_parames = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+	        }	        
+	        photo.setLayoutParams(image_parames);*/
+	        
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// Set Button Listeners
 		closeBtn.setOnClickListener(new View.OnClickListener() {
@@ -96,6 +128,7 @@ public class PhotoActivity extends Activity {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	/**
@@ -127,20 +160,9 @@ public class PhotoActivity extends Activity {
 		//Toast.makeText(getApplicationContext(), imageUrl, Toast.LENGTH_SHORT).show();	
 		
 		if( imageUrl.startsWith("http") ) {
-			Glide.with(getApplicationContext())
-	        .load(imageUrl)
-	        //.fitCenter()
-	        .crossFade(1000)
-	        //.override(80,80)
-	        .placeholder(place)
-	        .error(warning)
-	        .thumbnail(0.1f)//10%的原大小
-	        .into(photo);
-			hideLoadingAndUpdate();
-			progress.setVisibility(View.INVISIBLE);
-	
-		/*Picasso.with(this)
-				.load(imageUrl)
+
+			Picasso.with(this)
+				.load(StringProcessCode.toBrowserCode(imageUrl))
 				.resize(1024, 0)
 				.onlyScaleDown()
 				.into(photo, new com.squareup.picasso.Callback() {
@@ -154,7 +176,10 @@ public class PhotoActivity extends Activity {
 						Toast.makeText(getApplicationContext(), "Error loading image.", Toast.LENGTH_LONG).show();
 						finish();
 					}
-				});*/
+			});
+			
+			progress.setVisibility(View.INVISIBLE);
+			
 		} else if ( imageUrl.startsWith("data:image")){
 	            String base64String = imageUrl.substring(imageUrl.indexOf(",")+1);
 	            byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
@@ -165,22 +190,17 @@ public class PhotoActivity extends Activity {
 	            photo.setImageURI(Uri.parse(imageUrl));
 	            hideLoadingAndUpdate();
 	    }
-	}
-	
-	
-	
+	}	
+
 	public class HttpDownloader {
 		private URL url = null;
 
 		
 	     public void downFile(final String urlStr, final String path, final String fileName) throws Exception {
-	        
+	    	 
 	         try {
-	        	 
 	             final FileUtils fileUtils = new FileUtils();
-	       
 	             if (fileUtils.isFileExist(path + fileName)) {
-	            	 
 	            	 Toastshow(1);
 	             } else {
 	            	 
@@ -201,16 +221,25 @@ public class PhotoActivity extends Activity {
 							// TODO Auto-generated method stub
 							InputStream inputStream = null;
 							progress.setProgress(0); 
-							Log.i("binaryData:", "下載..........：" + arg2.length);  		
+							Log.i("binaryData:", "下載..........：" + arg2.length);  
+							
 							try {
 								inputStream = getInputStreamFromUrl(urlStr);
-								File resultFile = fileUtils.write2SDFromInput(path,fileName, inputStream);
-
+								
+								ByteArrayOutputStream bao = new ByteArrayOutputStream();
+								String text;
+								int c = 0;
+								byte[] buffer = new byte[8 * 1024];
+								while ((c = inputStream.read(buffer)) != -1) {
+									bao.write(buffer, 0, c);
+								}
+								inputStream.close();
+								bao.close();								
+								File resultFile = fileUtils.write2SDFromInput(path,fileName, new ByteArrayInputStream(bao.toByteArray()));
 				                 if (resultFile == null) {
 				                	 Toastshow(-1);
 				                     return ;
-				                 }
-				                 
+				                 }				                 
 				                 Toastshow(0);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -222,8 +251,7 @@ public class PhotoActivity extends Activity {
 					                 e.printStackTrace();
 					             }
 					         }
-						}
-						
+						}						
 									 @Override
 									 public void onStart() {
 						                 super.onStart();
@@ -271,21 +299,20 @@ public class PhotoActivity extends Activity {
 	     }
 	     
 	     public InputStream getInputStreamFromUrl(String urlStr) throws MalformedURLException, IOException{
+	    	Toast.makeText(getApplicationContext(), "下載中...", Toast.LENGTH_SHORT).show();
+	    	urlStr = StringProcessCode.ecodeUrlWithUTf8(urlStr);
 		    // 建立一個URL物件 
-		   	url = new URL(urlStr);
+		   	url = new URL(urlStr.trim());
 		   	// 建立一個Http連接
 		   	HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+		   	urlConn.setRequestMethod("POST");
+		   	urlConn.setConnectTimeout(6*1000);
+		   	urlConn.setReadTimeout(6*1000);
 		   	//得到輸入流
 		   	InputStream inputStream = urlConn.getInputStream();
-			   	/*String line = null;
-			   	StringBuffer stringBuffer = new StringBuffer();
-			   	BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-			   	while((line = bufferedReader.readLine()) != null){
-			   	stringBuffer.append(line);
-			   	}*/
-		   		//Toast.makeText(getApplicationContext(), inputStream.toString(), Toast.LENGTH_LONG).show();
 		   	return inputStream;
 	     }
+	     
 	     
 	     
 	     public void Toastshow(int mt){
