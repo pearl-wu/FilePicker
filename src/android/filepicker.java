@@ -2,7 +2,6 @@ package com.bais.filepicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +26,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
@@ -36,14 +37,23 @@ public class filepicker extends CordovaPlugin {
     private JSONObject params; 
     private ArrayList<String> exts;
     private static String PTAG = "MultiImageSelector";
-    private static final String FTAG = "MFileChooser";
     private static final String WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private static final String READ = Manifest.permission.READ_EXTERNAL_STORAGE;
-    private static final int REQ_CODE = 0;
     
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
        this.callbackContext = callbackContext;
+       
+       
+       if(action.equals("version")){
+    	   try {
+    		    PackageInfo packageInfo = cordova.getActivity().getPackageManager().getPackageInfo(cordova.getActivity().getPackageName(), 0);
+    		    this.callbackContext.success(packageInfo.versionName);
+    		} catch (NameNotFoundException e) {
+    		    //Handle exception
+    			this.callbackContext.error(e.hashCode());
+    		}
+       }
        
        
        if (action.equals("get")) {
@@ -172,7 +182,6 @@ public class filepicker extends CordovaPlugin {
         	   i.putExtra("options", args.optJSONObject(2).toString());
         	   cordova.getActivity().startActivity(i);
            } else {
-        	   //cordova.requestPermissions(this, REQ_CODE, new String[]{WRITE, READ});
         	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
            }
            return true;
