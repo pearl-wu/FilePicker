@@ -69,7 +69,7 @@
 		<source-file src="res/drawable/txt.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/zip.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/rar.png" target-dir="res/drawable"/>
-		<source-file src="res/drawable/7z.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/z.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/apk.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/iso.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/exe.png" target-dir="res/drawable"/>
