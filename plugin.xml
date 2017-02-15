@@ -80,6 +80,7 @@
 		<source-file src="res/drawable/avi.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/mp3.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/mp4.png" target-dir="res/drawable"/>
+		<source-file src="res/drawable/warning.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable-hdpi/button_default.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/button_hover.9.png" target-dir="res/drawable-hdpi"/>
 		<source-file src="res/drawable-hdpi/check_icon.png" target-dir="res/drawable-hdpi"/>
