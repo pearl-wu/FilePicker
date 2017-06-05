@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -78,11 +79,9 @@ public class CustomfileActivity extends Activity{
 		        url = new String[cursor.getCount()];
 		        sz = new long[cursor.getCount()];
 		        fillMaps = new ArrayList<HashMap<String, Object>>();
-		        if(cursor == null)  
-		            return;  
-		        
-		        if(cursor.moveToLast()){ 	
-
+		        if(cursor == null) return;
+		        Log.e("檔案總數量","共 "+cursor.getCount()+" 個");
+		        if(cursor.moveToLast()){
 		        	for(int a=0; a<cursor.getCount(); a++){
 		        	   cursor.moveToPosition(a);
 		               String data = cursor.getString(1);
@@ -109,7 +108,7 @@ public class CustomfileActivity extends Activity{
 		               fillMaps.add(map);
 		               sz[a] = sx;
 		               url[a] = data;     
-		               //Toast.makeText(this, sz[a]+"", Toast.LENGTH_SHORT).show();
+		               Toast.makeText(this, sz[a]+"", Toast.LENGTH_SHORT).show();
 		            }
 		        	 cursor.close();
 		        	
@@ -123,29 +122,27 @@ public class CustomfileActivity extends Activity{
 		            int[] to = new int[] {icong, fline, sline, time };
 		            listView = (ListView)findViewById(lists);
 		            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), fillMaps, main_item, from, to);
-		            listView.setAdapter(adapter);					
-		        } 	
-		       
+		            listView.setAdapter(adapter);			            
+		           		
+		    		listView.setOnItemClickListener(new OnItemClickListener(){
+		                 public void onItemClick(AdapterView<?> parent, View v, int position, long id)
+		                 {            	 
+		                     //Toast.makeText(CustomfileActivity.this, "您點選了第 "+sz[position], Toast.LENGTH_SHORT).show();
+		                	 Intent data = new Intent();
+		                	 data.putExtra("single_path", url[position]);
+		                	 data.putExtra("sz", sz[position]);
+		                	 try{
+		         				setResult(RESULT_OK, data);
+		    	     		 } catch (Exception e){
+		    	     				e.printStackTrace();
+		    	     		 }
+		    	     		 finish();
+		                 }
+		            }
+		           );
+		        }
 			}		
-		}	
-		
-		listView.setOnItemClickListener(new OnItemClickListener()
-        {
-             public void onItemClick(AdapterView<?> parent, View v, int position, long id)
-             {            	 
-                 //Toast.makeText(CustomfileActivity.this, "您點選了第 "+sz[position], Toast.LENGTH_SHORT).show();
-            	 Intent data = new Intent();
-            	 data.putExtra("single_path", url[position]);
-            	 data.putExtra("sz", sz[position]);
-            	 try{
-     				setResult(RESULT_OK, data);
-	     		 } catch (Exception e){
-	     				e.printStackTrace();
-	     		 }
-	     		 finish();
-             }
-        }
-       );
+		}
 	}	
 
 
