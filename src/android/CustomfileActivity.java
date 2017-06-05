@@ -30,7 +30,7 @@ import android.widget.Toast;
 
 public class CustomfileActivity extends Activity{
 	
-	private ArrayList<String> extensions = new ArrayList<>();
+	private ArrayList<String> extensions = new ArrayList<String>();
 	Category currentCategory;
 	String record = "";
 	ListView listView;
