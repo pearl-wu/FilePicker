@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale.Category;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -31,7 +30,6 @@ import android.widget.Toast;
 public class CustomfileActivity extends Activity{
 	
 	private ArrayList<String> extensions = new ArrayList<String>();
-	Category currentCategory;
 	String record = "";
 	ListView listView;
 	private String[] url;
