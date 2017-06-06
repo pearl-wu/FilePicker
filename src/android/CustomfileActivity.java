@@ -108,7 +108,7 @@ public class CustomfileActivity extends Activity{
 		               fillMaps.add(map);
 		               sz[a] = sx;
 		               url[a] = data;     
-		               Toast.makeText(this, sz[a]+"", Toast.LENGTH_SHORT).show();
+		              // Toast.makeText(this, sz[a]+"", Toast.LENGTH_SHORT).show();
 		            }
 		        	 cursor.close();
 		        	
