@@ -300,7 +300,7 @@ public class PhotoActivity extends Activity {
 	     
 	     public InputStream getInputStreamFromUrl(String urlStr) throws MalformedURLException, IOException{
 	    	Toast.makeText(getApplicationContext(), "下載中...", Toast.LENGTH_SHORT).show();
-	    	urlStr = StringProcessCode.ecodeUrlWithUTf8(urlStr);
+	    	//urlStr = StringProcessCode.ecodeUrlWithUTf8(urlStr);
 		    // 建立一個URL物件 
 		   	url = new URL(urlStr.trim());
 		   	// 建立一個Http連接
