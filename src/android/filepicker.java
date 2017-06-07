@@ -214,6 +214,10 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				   dir.mkdirs();
 			   }
 			   File file = new File(dirName, fileName);
+			   if(file.exists()) {
+			    showToast("Download went wrong, please try again or contact the developer.","long");
+			    return false;
+			   }
 			   if (overwrite == true || !file.exists()) {
 				    Intent intent = new Intent ();
 				    intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -224,7 +228,7 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 				    								.setSmallIcon(notification_icon);
 				    
 				    int mNotificationId = new Random().nextInt(10000);
-				    fileUrl = StringProcessCode.ecodeUrlWithUTf8(fileUrl);
+				    //fileUrl = StringProcessCode.ecodeUrlWithUTf8(fileUrl);
 				    URL url = new URL(fileUrl);
 				    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
 				    ucon.setRequestMethod("POST");
@@ -278,11 +282,7 @@ private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boo
 			    showToast("File is already downloaded.","short");
 			    return false;
 			   }
-			   if(!file.exists()) {
-			    showToast("Download went wrong, please try again or contact the developer.","long");
-			    //Log.e("PhoneGapLog", "Downloader Plugin: Error: Download went wrong.");
-			    return false;
-			   }
+			  
 			   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 			   return true;
 		  } catch (FileNotFoundException e) {
