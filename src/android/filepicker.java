@@ -54,6 +54,15 @@ public class filepicker extends CordovaPlugin {
     			this.callbackContext.error(e.hashCode());
     		}
        }
+	    
+       if(action.equals("permission")){
+           selfperminnion perminnion = new selfperminnion();
+           if(!perminnion.selfPermissionGranted){
+               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.CAMERA},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+           }
+       }   
        
        
        if (action.equals("get")) {
