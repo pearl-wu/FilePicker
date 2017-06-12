@@ -14,7 +14,7 @@ public class selfperminnion {
     public boolean selfPermissionGranted;
 
     public boolean selfPermissionGranted(Context context, String permission) {
-        // Android 6.0 以前，全部默认授权
+        // Android 6.0 以前，默認
         boolean result = true;
         int targetSdkVersion = 16;
         
