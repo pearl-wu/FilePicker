@@ -27,8 +27,8 @@ exports.openweb = function(message, win, fail){
     exec(win, fail, "filepicker", "openweb", [message]);
 }
 
-exports.permission = function(message, win, fail){
-    exec(win, fail, "filepicker", "permission", [message]);
+exports.permission = function(win, fail){
+    exec(win, fail, "filepicker", "permission",[]);
 }
 
 exports.choosepicture = function(win, fail, options) {
