@@ -1,5 +1,31 @@
 package com.bais.filepicker;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.LOG;
+import org.apache.cordova.PluginResult;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,27 +37,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.LOG;
-import org.apache.cordova.PluginResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.Manifest;
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.Uri;
-import android.os.Environment;
-import android.widget.Toast;
-
 public class filepicker extends CordovaPlugin {
     private CallbackContext callbackContext;
     private JSONObject params; 
@@ -39,7 +44,9 @@ public class filepicker extends CordovaPlugin {
     private static String PTAG = "MultiImageSelector";
     private static final String WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private static final String READ = Manifest.permission.READ_EXTERNAL_STORAGE;
-    
+    private selfperminnion perminnion = new selfperminnion();
+    private static String perm_error = "檔案讀取權限尚未開放，請至應用程式啟動儲存裝置權限";
+
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
        this.callbackContext = callbackContext;
@@ -56,18 +63,18 @@ public class filepicker extends CordovaPlugin {
        }
 	    
        if(action.equals("permission")){
+           String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE };
            selfperminnion perminnion = new selfperminnion();
            if(!perminnion.selfPermissionGranted){
-               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.CAMERA},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-               ActivityCompat.requestPermissions(cordova.getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+               ActivityCompat.requestPermissions(cordova.getActivity(), permissions, 10);
            }
        }   
        
        
        if (action.equals("get")) {
          cordova.getThreadPool().execute(new Runnable(){
-	          public void run() {
+	          @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+              public void run() {
 	           try {
 	        	    params = args.getJSONObject(0);
 		            String fileUrl=params.getString("url");
@@ -114,6 +121,7 @@ public class filepicker extends CordovaPlugin {
        if(action.equals("openfile")){
     	   this.params = args.getJSONObject(0);
     	   String fileUrl = params.getString("url");
+           if(!selfperminnion(20)){return false;}
            try{
                openFile(fileUrl);
                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
@@ -121,9 +129,11 @@ public class filepicker extends CordovaPlugin {
            }catch(IOException e){
                return false;
            }
+
        } 
        
        if(action.equals("choosepicture")){
+           if(!selfperminnion(30)){return false;}
                this.params = args.getJSONObject(0);
                Intent intent = new Intent(cordova.getActivity(), CustomGalleryActivity.class);
                int max = 15;
@@ -174,31 +184,43 @@ public class filepicker extends CordovaPlugin {
        }   
      
        if(action.equals("chooesfiile")){
-    	   exts = new ArrayList<String>();
-    	   int count = args.length();
-    	   for(int i = 0;i<count;i++){
-           	   exts.add(args.getString(i).toLowerCase());
-           }
-	        chooseFile(callbackContext,exts);
-	        return true;
+           exts = new ArrayList<String>();
+           int count = args.length();
+           for(int i = 0;i<count;i++){ exts.add(args.getString(i).toLowerCase()); }
+           if(!selfperminnion(40)){return false;}
+           chooseFile(callbackContext,exts);
+           return true;
        }
        
        if (action.equals("show")) {
+           if(!selfperminnion(50)){return false;}
            if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
-        	   Intent i = new Intent(cordova.getActivity(), PhotoActivity.class); 
-        	   i.putExtra("url", args.getString(0));
-        	   i.putExtra("title", args.getString(1));
-        	   i.putExtra("options", args.optJSONObject(2).toString());
-        	   cordova.getActivity().startActivity(i);
+               Intent i = new Intent(cordova.getActivity(), PhotoActivity.class);
+               i.putExtra("url", args.getString(0));
+               i.putExtra("title", args.getString(1));
+               i.putExtra("options", args.optJSONObject(2).toString());
+               cordova.getActivity().startActivity(i);
            } else {
-        	   callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+               callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
            }
            return true;
-       }       
-       
+       }
         return false;
     }
-   
+
+public boolean selfperminnion(int mm){
+    if(!perminnion.selfPermissionGranted){
+        int permission = ContextCompat.checkSelfPermission(cordova.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(cordova.getActivity(), perm_error, Toast.LENGTH_LONG).show();
+            String[] permissions = { Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE };
+            ActivityCompat.requestPermissions(cordova.getActivity(), permissions, mm);
+            // callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR,perm_error));
+            return false;
+        }
+    }
+    return true;
+}
     
 public void chooseFile(CallbackContext callbackContext, ArrayList<String> ext) {
    Context context=this.cordova.getActivity().getApplicationContext();
@@ -214,6 +236,7 @@ public void chooseFile(CallbackContext callbackContext, ArrayList<String> ext) {
 }
 
    
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
 private Boolean downloadUrl(String fileUrl, String dirName, String fileName, Boolean overwrite, CallbackContext callbackContext)
 	throws InterruptedException, JSONException {
 		  try {
