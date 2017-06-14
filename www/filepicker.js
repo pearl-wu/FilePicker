@@ -54,7 +54,7 @@ exports.chooesfiile = function(message, win, fail){
     exec(win, fail, "filepicker", "chooesfiile", message);
 }
 
-exports.photoveiw = function(url, title, options){
+exports.photoveiw = function(url, title, options, win, fail){
     if( title == undefined ) {
       title = '';
     }
@@ -63,5 +63,5 @@ exports.photoveiw = function(url, title, options){
         options = {};
     } 
     
-    exec(function(){}, function(){}, "filepicker", "show", [url, title, options]);
+    exec(win, fail, "filepicker", "show", [url, title, options]);
 }
