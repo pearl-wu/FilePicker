@@ -203,6 +203,7 @@ public class filepicker extends CordovaPlugin {
             }
             if(!selfperminnion(50)){return false;}
             if (cordova.hasPermission(READ) && cordova.hasPermission(WRITE)) {
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
                 Intent i = new Intent(cordova.getActivity(), PhotoActivity.class);
                 i.putExtra("url", args.getString(0));
                 i.putExtra("title", args.getString(1));
