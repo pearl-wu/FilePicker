@@ -51,7 +51,6 @@ public class filepicker extends CordovaPlugin {
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         this.callbackContext = callbackContext;
 
-
         if(action.equals("version")){
             try {
                 PackageInfo packageInfo = cordova.getActivity().getPackageManager().getPackageInfo(cordova.getActivity().getPackageName(), 0);
@@ -72,10 +71,13 @@ public class filepicker extends CordovaPlugin {
 
 
         if (action.equals("get")) {
+            params = args.getJSONObject(0);
+            Toast.makeText(cordova.getActivity(), urlhas(params.getString("url"))+"", Toast.LENGTH_LONG).show();
             if(!urlhas(params.getString("url"))){
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
                 return true;
             }
+
             cordova.getThreadPool().execute(new Runnable(){
                 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                 public void run() {
@@ -222,7 +224,8 @@ public class filepicker extends CordovaPlugin {
         try {
             HttpURLConnection.setFollowRedirects(false);
             HttpURLConnection con = (HttpURLConnection) new URL(data).openConnection();
-            con.setRequestMethod("HEAD");
+            //con.setRequestMethod("HEAD");
+            con.setInstanceFollowRedirects(true);
             if((con.getResponseCode() == HttpURLConnection.HTTP_OK)){  fag = true;  }
             return fag;
         }
