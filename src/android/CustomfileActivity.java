@@ -2,29 +2,30 @@ package com.bais.filepicker;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.icu.text.SimpleDateFormat;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Environment;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class CustomfileActivity extends Activity{
 	
@@ -52,86 +53,63 @@ public class CustomfileActivity extends Activity{
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public void nameinfo(){
 		Bundle extras = getIntent().getExtras();
+		ArrayList<String> exts = new ArrayList<String>(extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS));
 		extensions = extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS);
-
 		if (extras != null) {
-			if (extras.getStringArrayList(Constants.KEY_FILTER_FILES_EXTENSIONS) != null) {
-				String[] projection = new String[]{
-						MediaStore.Files.FileColumns.TITLE,
-						MediaStore.Files.FileColumns.DATA,
-						MediaStore.Files.FileColumns.DATE_ADDED,
-						MediaStore.Files.FileColumns.SIZE,
-						MediaStore.Files.FileColumns.DATE_MODIFIED
-				};
-				Uri uri = MediaStore.Files.getContentUri("external");
-				String selection = "";
-				for(int i=0;i<extensions.size();i++)
-				{
-					if(i!=0)
-					{
-						selection = selection+" OR ";
-					}
-					selection = selection+MediaStore.Files.FileColumns.DATA+" LIKE '%"+extensions.get(i)+"' ";
-				}
-				String sortOrder = MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC";
-				Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, null, sortOrder);
-				List<HashMap<String, Object>> fillMaps;
+			final List<HashMap<String, Object>> fillMaps = new ArrayList<HashMap<String, Object>>();
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Calendar c = Calendar.getInstance();
 
-				url = new String[cursor.getCount()];
-				sz = new long[cursor.getCount()];
-				fillMaps = new ArrayList<HashMap<String, Object>>();
-				if(cursor == null) return;
-				Log.e("檔案總數量","共 "+cursor.getCount()+" 個");
-				if(cursor.moveToLast()){
-					for(int a=0; a<cursor.getCount(); a++){
-						cursor.moveToPosition(a);
-						String data = cursor.getString(1);
-						String[] tokens = data.split("/");
-						String filename = tokens[tokens.length-1];
-						long sx = Long.valueOf(cursor.getString(3));
-						long timestamp = Long.parseLong(cursor.getString(4));
-						File files = new File(data);
-						Calendar cal = Calendar.getInstance();
-						long time = files.lastModified();
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						cal.setTimeInMillis(time);
-						//Toast.makeText(getApplication(), formatter.format(cal.getTime()), Toast.LENGTH_SHORT).show();
-
+			//內存路徑
+			Collection<File> founcFiles = FileUtils.listFiles(new File(Environment.getExternalStorageDirectory().getAbsolutePath()),TrueFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY);
+			for (File f : founcFiles) {
+				for(int a=0;a<exts.size();a++) {
+					if (f.toString().endsWith(exts.get(a))){
+						File files = new File(f.toString());
+						long sizeInBytes = files.length();
+						c.setTimeInMillis(f.lastModified());
+						String tape = exts.get(a);
+						if (f.toString().endsWith("7z")) tape = "z";
+						int flags = this.getResources().getIdentifier(tape, "drawable", this.getPackageName());
 						HashMap<String, Object> map = new HashMap<String, Object>();
-						//Toast.makeText(this, String.valueOf(filename.substring(filename.lastIndexOf(".")+1).toLowerCase()), Toast.LENGTH_SHORT).show();
-						String at = String.valueOf(filename.substring(filename.lastIndexOf(".")+1).toLowerCase());
-						if(at=="7z") at = "z";
-						int flags = this.getResources().getIdentifier(at, "drawable", this.getPackageName());
+						String[] tokens = f.toString().split("/");
 						map.put("filetapy", flags);
-						map.put("filename", filename);
-						map.put("filesize", FormaetfileSize(sx));
-						map.put("filetime", formatter.format(cal.getTime()));
+						map.put("filename",tokens[tokens.length-1]);
+						map.put("filesize", FormaetfileSize(sizeInBytes));
+						map.put("filetime", formatter.format(c.getTime()));
+						map.put("fileurl", f.toString());
+						map.put("sizeall", sizeInBytes);
 						fillMaps.add(map);
-						sz[a] = sx;
-						url[a] = data;
-						// Toast.makeText(this, sz[a]+"", Toast.LENGTH_SHORT).show();
+						//Log.d("-----Found file-----", "Found file:" + f.toString()+"--"+sizeInBytes);
 					}
-					cursor.close();
+				}
+			}
 
-					int main_item = this.getResources().getIdentifier("multiselectorfile_item", "layout", this.getPackageName());
-					int lists = this.getResources().getIdentifier("list", "id", this.getPackageName());
-					int icong = this.getResources().getIdentifier("icon", "id", this.getPackageName());
-					int sline = this.getResources().getIdentifier("secondLine", "id", this.getPackageName());
-					int time = this.getResources().getIdentifier("timeLine", "id", this.getPackageName());
-					int fline = this.getResources().getIdentifier("firstLine", "id", this.getPackageName());
-					String[] from = new String[] { "filetapy", "filename", "filesize", "filetime"};
-					int[] to = new int[] {icong, fline, sline, time };
-					listView = (ListView)findViewById(lists);
-					SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), fillMaps, main_item, from, to);
-					listView.setAdapter(adapter);
+			//SD外存路徑
+			/*if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ) {//判断外部存储是否可
+				Log.d("-----Found file-----", "Found file:" + this.getExternalFilesDir("/").getAbsolutePath());
+				this.getExternalFilesDir("/").getAbsolutePath();
+			}*/
 
-					listView.setOnItemClickListener(new OnItemClickListener(){
+			int main_item = this.getResources().getIdentifier("multiselectorfile_item", "layout", this.getPackageName());
+			int lists = this.getResources().getIdentifier("list", "id", this.getPackageName());
+			int icong = this.getResources().getIdentifier("icon", "id", this.getPackageName());
+			int sline = this.getResources().getIdentifier("secondLine", "id", this.getPackageName());
+			int time = this.getResources().getIdentifier("timeLine", "id", this.getPackageName());
+			int fline = this.getResources().getIdentifier("firstLine", "id", this.getPackageName());
+			String[] from = new String[] { "filetapy", "filename", "filesize", "filetime"};
+			int[] to = new int[] {icong, fline, sline, time };
+			listView = (ListView)findViewById(lists);
+			SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), fillMaps, main_item, from, to);
+			listView.setAdapter(adapter);
+
+					listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 						public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 						{
-							//Toast.makeText(CustomfileActivity.this, "您點選了第 "+sz[position], Toast.LENGTH_SHORT).show();
+							Toast.makeText(CustomfileActivity.this, "您點選了第 "+fillMaps.get(0).get("fileurl"), Toast.LENGTH_SHORT).show();
 							Intent data = new Intent();
-							data.putExtra("single_path", url[position]);
-							data.putExtra("sz", sz[position]);
+							data.putExtra("single_path", fillMaps.get(0).get("fileurl").toString());
+							data.putExtra("sz", fillMaps.get(0).get("sizeall").toString());
 							try{
 								setResult(RESULT_OK, data);
 							} catch (Exception e){
@@ -140,12 +118,8 @@ public class CustomfileActivity extends Activity{
 							finish();
 						}
 					});
-				}
-			}
 		}
-
 	}
-
 
 	public static String FormaetfileSize(long size){
 		 if (size <= 0)
