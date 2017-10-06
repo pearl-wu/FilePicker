@@ -55,7 +55,8 @@
 		<source-file src="libs/picasso-2.5.2.jar" target-dir="libs/" />
 		<source-file src="libs/photoview-library-1.2.2.jar" target-dir="libs/" />
 		<source-file src="libs/glide-3.7.0.jar" target-dir="libs/" />
-		
+		<source-file src="libs/commons-io-2.5.jar" target-dir="libs/" />
+				
 		<source-file src="res/drawable/button_bg.xml" target-dir="res/drawable"/>
 		<source-file src="res/drawable/check_icon.png" target-dir="res/drawable"/>
 		<source-file src="res/drawable/no_media.png" target-dir="res/drawable"/>
