@@ -1,50 +1,49 @@
 package com.bais.filepicker;
 
-import uk.co.senab.photoview.PhotoViewAttacher;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.net.Uri;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.squareup.picasso.Picasso;
-
-import cz.msebera.android.httpclient.Header;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
+
+import cz.msebera.android.httpclient.Header;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class PhotoActivity extends Activity {
-	
 	private PhotoViewAttacher mAttacher;
 	private ImageView photo;
 	private int warning;
 	private int place;
 	private int wid;
 	private int heg;
+    private int W;
+    private int H;
 	private String imageUrl;
 	private ImageButton closeBtn;
 	private ImageButton shareBtn;
@@ -85,14 +84,31 @@ public class PhotoActivity extends Activity {
 	        //Toast.makeText(getApplicationContext(), bitmap.getWidth()+"*"+bitmap.getHeight(), Toast.LENGTH_SHORT).show();	
 	        wid = bitmap.getWidth();
 	        heg = bitmap.getHeight();
-	        
-	       /* if(bitmap.getWidth()<bitmap.getHeight()){
-	        	image_parames = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-	        }else{
-	        	image_parames = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-	        }	        
-	        photo.setLayoutParams(image_parames);*/
-	        
+            int dpi = bitmap.getGenerationId(); // 就是屏幕密度 *160而已,屏幕密度DPI（120 / 160 / 240）
+            float den = bitmap.getDensity(); // 屏幕密度（0.75 / 1.0 / 1.5）
+
+            DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+            ((Activity) this).getWindowManager().getDefaultDisplay()
+                    .getMetrics(mDisplayMetrics);
+            W = mDisplayMetrics.widthPixels;
+            H = mDisplayMetrics.heightPixels;
+            float density = mDisplayMetrics.density; // 屏幕密度（0.75 / 1.0 / 1.5）
+            int densityDpi = mDisplayMetrics.densityDpi; // 就是屏幕密度 *160而已,屏幕密度DPI（120 / 160 / 240）
+           // Log.i("getResolution2", "Width = " + W + "px");
+           // Log.i("getResolution2", "Height = " + H + "px");
+           // Log.i("getResolution2", "density = " + density);
+           // Log.i("getResolution2", "densityDpi = " + densityDpi);
+           // Log.i("Resolution2", "Width = " + wid + "px");
+           // Log.i("Resolution2", "Height = " + heg + "px");
+           // Log.i("Resolution2", "density = " + den);
+           // Log.i("Resolution2", "densityDpi = " + dpi);
+            //double zw = (double)W/wid;
+            //double zh = (double)H/heg;
+            Log.i("Resolution2", "density = " + den);
+            if( wid>W || heg>H ){
+                    wid = W;
+                    heg =H;
+            }
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -108,7 +124,6 @@ public class PhotoActivity extends Activity {
 				finish();
 			}
 		});
-
 		shareBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -119,12 +134,12 @@ public class PhotoActivity extends Activity {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
 			}
 		});
 
 		try {		
 			loadImage();
+            //photo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -156,12 +171,21 @@ public class PhotoActivity extends Activity {
 		mAttacher.update();
 	}
 
-	@SuppressLint("InlinedApi") private void loadImage() throws MalformedURLException{
-		//Toast.makeText(getApplicationContext(), imageUrl, Toast.LENGTH_SHORT).show();	
-		
+	private void loadImage() throws MalformedURLException{
 		if( imageUrl.startsWith("http") ) {
+         Glide.with(this)
+                 .load(imageUrl)
+                 //.skipMemoryCache(false)
+                 .override(wid,heg)
+				 .priority(Priority.LOW)
+                 .centerCrop()
+                 .fitCenter()
+                    //.crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .dontAnimate()
+                    .into(photo);
 
-			Picasso.with(this)
+			/*Picasso.with(this)
 				.load(StringProcessCode.toBrowserCode(imageUrl))
 				.resize(1024, 0)
 				.onlyScaleDown()
@@ -170,17 +194,15 @@ public class PhotoActivity extends Activity {
 					public void onSuccess() {
 						hideLoadingAndUpdate();
 					}
-
 					@Override
 					public void onError() {
 						Toast.makeText(getApplicationContext(), "Error loading image.", Toast.LENGTH_LONG).show();
 						finish();
 					}
-			});
+			});*/
 			
 			progress.setVisibility(View.INVISIBLE);
-			
-		} else if ( imageUrl.startsWith("data:image")){
+		}/* else if ( imageUrl.startsWith("data:image")){
 	            String base64String = imageUrl.substring(imageUrl.indexOf(",")+1);
 	            byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
 	            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
@@ -189,15 +211,12 @@ public class PhotoActivity extends Activity {
 	    } else {
 	            photo.setImageURI(Uri.parse(imageUrl));
 	            hideLoadingAndUpdate();
-	    }
+	    }*/
 	}	
 
 	public class HttpDownloader {
 		private URL url = null;
-
-		
 	     public void downFile(final String urlStr, final String path, final String fileName) throws Exception {
-	    	 
 	         try {
 	             final FileUtils fileUtils = new FileUtils();
 	             if (fileUtils.isFileExist(path + fileName)) {
